@@ -1,0 +1,2202 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Terra</name>
+    </assembly>
+    <members>
+        <member name="T:Terra.Synonym">
+            <summary>
+            An secondary, alternate term for any piece of information in Terra, be 
+            it a category, property, option, or taxonomy.  Even headings and 
+            superheadings may have synonyms.  
+            <para>
+            Synonyms may also be used as simple translations of a term, given that
+            the synonym's language may freely differ from that of the meme to which
+            it is related.  Ideally, it is better, for example, to map a category in
+            one language to its equivalent in another, but for simple uses a synonym
+            may suffice.
+            </para>
+            </summary>
+        </member>
+        <member name="T:Terra.Node">
+            <summary>
+            The base class of all Terra models, such as Category, Taxonomy, etc.
+            </summary>
+        </member>
+        <member name="P:Terra.Synonym.Name">
+            <summary>
+            The name of this synonym
+            </summary>
+        </member>
+        <member name="P:Terra.Synonym.Slug">
+            <summary>
+            An SEO-compliant slug for the synonym
+            </summary>
+        </member>
+        <member name="P:Terra.Synonym.External">
+            <summary>
+            An external identifier for the synonym (rare)
+            </summary>
+        </member>
+        <member name="P:Terra.Synonym.Language">
+            <summary>
+            The language of the synonym name
+            </summary>
+        </member>
+        <member name="P:Terra.Synonym.Opco">
+            <summary>
+            The operating company responsible for this synonym
+            </summary>
+        </member>
+        <member name="P:Terra.Synonym.Version">
+            <summary>
+            An internal tracking code used to ensure that updates by the client
+            do not overwrite changes made on the server between the time the
+            client version of this synonym was retrieved and when it was 
+            written
+            </summary>
+        </member>
+        <member name="T:Terra.Service.Categories">
+            <summary>
+            Terra API calls relating to categories.  
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.Categories.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.Categories"/>
+        </member>
+        <member name="M:Terra.Service.Categories.Children(Terra.Taxonomy)">
+            <summary>
+            Get the top-level categories for the given taxonomy.  Note that this
+            does not return all the categories for a taxonomy.
+            </summary>
+            <param name="taxonomy">The taxonomy of categories</param>
+            <returns>A list of Category objects</returns>
+            <exception cref="T:Terra.ServerException">The given taxonomy does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Get(System.String,System.String)">
+            <summary>
+            Look for details about a specific category.  Note that this call 
+            simply returns the basic information, such as the name and language
+            of the category.  It does not return child categories or mappings.
+            <para>
+            It is useful for confirming the existence of a category.
+            </para>
+            </summary>
+            <param name="opco">The three or four letter code for the operating company, e.g. "PKT"</param>
+            <param name="slug">The slug identifier for the category, unique to the operating company</param>
+            <returns>A category</returns>
+            <exception cref="T:Terra.ServerException">Either the operating company or category does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Create(System.String,System.String,System.String,System.String,Terra.Node)">
+            <summary>
+            Create a new category for the given operating company.  The category
+            name need not be unique, but its (optional) slug must be.  
+            <para>
+            If the slug is not provided (either null or an empty string), it will
+            be created by transforming the name of the category into an SEO-ready
+            value.  For example, the name "Mexican Restaurants" would be transformed 
+            into "mexican-restaurants".
+            </para>
+            <para>
+            If language is not supplied it will default to the language of the
+            operating company.
+            </para>
+            </summary>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <param name="name">The name of the category</param>
+            <param name="slug">A unique identifier for the category, or null to have one generated</param>
+            <param name="language">The language of the category, or null to use the opco's language</param>
+            <param name="parent">May be either a category or a taxonomy; if a taxonomy, becomes a top-level category in that taxonomy</param>
+            <returns>The newly created Category object</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the slug already exists, returns a status of Conflict.</description>
+            </item>
+            <item>
+            <description>If the operating company or parent does not exist, returns a status of Not Found.</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Update(Terra.Category)">
+            <summary>
+            Update's the name and language of the given category with the server. 
+            Will not change the slug or operating company however.  If you modify
+            either of those, mostly likely you will receive a Not Found status in
+            the ServerException, indicating the category object could not be found
+            on the Terra server.
+            <para>
+            Note that this method will return a new Category object.  The original
+            object will not be modified.
+            </para>
+            </summary>
+            <param name="category">An existing category with its name or language modified</param>
+            <returns>A new Category object with the updated information, as confirmation</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the existing category could not be found on the server, returns a status of Not Found</description>
+            </item>
+            <item>
+            <description>If the local category is older than the version on the server, a Precondition Failed status is returned</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Delete(Terra.Category)">
+            <summary>
+            Completely deletes the given category from the Terra server.  If
+            there are any categories associated with the category, they are
+            orphaned, as are any properties and options associated with the
+            category.
+            <para>
+            This method returns nothing.  If the delete is unsuccessful, an
+            exception will be raised.  Otherwise it completed successfully.
+            </para>
+            </summary>
+            <param name="category">The category to delete; only Opco and Slug are used</param>
+            <exception cref="T:Terra.ServerException">
+            Raises a Not Found exception if the category does not exist, or
+            a Precondition Failed if the category on the server is newer than
+            the one submitted.
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Synonyms(Terra.Category)">
+            <summary>
+            Get the list of synonyms associated with this category.
+            </summary>
+            <param name="category">The category</param>
+            <returns>A list of synonyms</returns>
+            <exception cref="T:Terra.ServerException">The category does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.CreateSynonym(Terra.Category,System.String,System.String,System.String)">
+            <summary>
+            Create a new synonym and associate it with this category.
+            <para>
+            Synonyms may also be used as a simple translation tool.  When you
+            create a synonym, by default it is assigned to the same langauge as
+            the operating company.  However, by assigning a different language
+            to the synonym, you now have a translation for the category.
+            </para>
+            </summary>
+            <param name="category">The category to associate with the synonym</param>
+            <param name="name">The human-readable name of the synonym</param>
+            <param name="slug">An SEO-compliant slug for the synonym; generated if not provided</param>
+            <param name="language">The language of the name; defaults to the opco's language</param>
+            <returns>The newly created Synonym</returns>
+            <exception cref="T:Terra.ServerException">The category does not exist, or the synonym already exists</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.AddSynonym(Terra.Category,Terra.Synonym)">
+            <summary>
+            Associate an existing synonym with a category.
+            </summary>
+            <param name="category">The category with which to associate the synonym</param>
+            <param name="synonym">The synonym for the category</param>
+            <exception cref="T:Terra.ServerException">Either the category or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.AddSynonym(Terra.Category,System.String,System.String)">
+            <summary>
+            This is a convenience method to create or add an existing synonym
+            (or translation) to a category.  If the synonym does not already
+            exist, it is created with a default slug (and default language, if
+            not otherwise indicated).  The synonym, existing or new, is
+            associated with the category.
+            </summary>
+            <param name="category">The category to associate with this synonym</param>
+            <param name="synonym">The new or existing name of a synonym</param>
+            <param name="language">The language of the synonym; defaults to the opco's language</param>
+            <returns>The new or existing synonym</returns>
+            <exception cref="T:Terra.ServerException">The category does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.RemoveSynonym(Terra.Category,Terra.Synonym)">
+            <summary>
+            Remove the synonym with from the category.  Note that this doesn't
+            delete the synonym, simply removes its association from this 
+            category.
+            </summary>
+            <param name="category">The category with which to disassociate the synonym</param>
+            <param name="synonym">The synonym for the category</param>
+            <exception cref="T:Terra.ServerException">Either the category or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Children(Terra.Category)">
+            <summary>
+            Get the direct child categories of the given category.
+            </summary>
+            <param name="category">The parent category</param>
+            <returns>A list of Category objects, or an empty list if there are none</returns>
+            <exception cref="T:Terra.ServerException">The given category</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Parents(Terra.Category)">
+            <summary>
+            Get the parent categories or taxonomies for the given category.
+            </summary>
+            <param name="category">The child category</param>
+            <returns>A mixed list of Category and Taxonomy objects</returns>
+        </member>
+        <member name="M:Terra.Service.Categories.AddChild(Terra.Category,Terra.Category)">
+            <summary>
+            Make the child category a child of the parent category.  
+            <para>
+            Please be aware that this will not automatically update any local 
+            lists or caches that you may have; the complexity of updating that 
+            information is left up to the client software.  
+            </para>
+            <para>
+            This method will not return any information upon success.  If it
+            fails for any reason, a Terra.ServerException is thrown.
+            </para>
+            </summary>
+            <param name="parent">The parent category</param>
+            <param name="child">The child category</param>
+            <exception cref="T:Terra.ServerException">Either the parent or child doesn't exist, or they cannot be related</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.RemoveChild(Terra.Category,Terra.Category)">
+            <summary>
+            Remove the child category from the parent category.  
+            <para>
+            Please be aware that this will not automatically update any local 
+            lists or caches that you may have; the complexity of updating that 
+            information is left up to the client software.  
+            </para>
+            <para>
+            This method will not return any information upon success.  If it
+            fails for any reason, a Terra.ServerException is thrown.
+            </para>
+            </summary>
+            <param name="parent">The parent category</param>
+            <param name="child">The child category</param>
+            <exception cref="T:Terra.ServerException">Either the parent or child doesn't exist, or their relation cannot be broken</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Properties(Terra.Category)">
+            <summary>
+            Look up the properties associated with the given category.  The list
+            returned does not include options, and there may be properties in
+            the list that have no options associated with them anyway.
+            </summary>
+            <param name="category">The category with which the properties are associated</param>
+            <returns>A list of Property objects</returns>
+            <exception cref="T:Terra.ServerException">The category does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.AddProperty(Terra.Category,Terra.Property)">
+            <summary>
+            Associate a property with a category.  This let's both users and 
+            the software know what properties should be included in queries 
+            such as inheritance.  It also serves as a visual tool for users, 
+            so they know the list of possible properties from which to select 
+            when adding options.
+            </summary>
+            <param name="category">The category with which to associate the property</param>
+            <param name="property">The property to associate</param>
+            <exception cref="T:Terra.ServerException">Either the property or the category doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.RemoveProperty(Terra.Category,Terra.Property)">
+            <summary>
+            Remove a property from a category.  Note that this does not remove 
+            any of the relations between options and this node.  It does, 
+            however, filter the options from any requests that use the properties 
+            associated with the node as a filter, such as inheritance.
+            </summary>
+            <param name="category">A category from which to remove the property</param>
+            <param name="property">The property to remove</param>
+            <exception cref="T:Terra.ServerException">Either the property or the node doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Options(Terra.Category)">
+            <summary>
+            Find all the options associated with this category.  
+            <para>
+            This operation can be a bit slow, as the system has to filter and 
+            collate options and properties.  It is typically faster to request
+            a list of properties, then request the options for a selected
+            property (this is how the Terra UI does things).  Of course by 
+            "slow", we mean takes around 300ms.
+            </para>
+            </summary>
+            <param name="category">The category of options to retrieve</param>
+            <returns>A list of Property objects with their Options list filled</returns>
+        </member>
+        <member name="M:Terra.Service.Categories.AddOption(Terra.Category,Terra.Property,Terra.Option)">
+            <summary>
+            Add an option to a category.  The category, option, and property
+            must all exist in the same operating company.
+            </summary>
+            <param name="category">The category to associate the option</param>
+            <param name="property">The property or "verb" used in the relation</param>
+            <param name="option">The option being related</param>
+            <exception cref="T:Terra.ServerException">Either the option, property or the category doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.RemoveOption(Terra.Category,Terra.Property,Terra.Option)">
+            <summary>
+            Remove an option from a category.  The category, option, and property
+            must all exist in the same operating company.
+            </summary>
+            <param name="category">The category from which to remove the option</param>
+            <param name="property">The property or "verb" used in the relation</param>
+            <param name="option">The option being removed</param>
+            <exception cref="T:Terra.ServerException">Either the option, property or the category doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.MappedTo(Terra.Category)">
+            <summary>
+            Look for the categories that the given category has been mapped
+            to.  In otherwords, what category-to-category mappings exists for
+            which this category is the subject of the relation?
+            </summary>
+            <param name="category">The subject category of the relations</param>
+            <returns>A list of object categories</returns>
+            <exception cref="T:Terra.ServerException">The subject category does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.MappedFrom(Terra.Category)">
+            <summary>
+            Look for the categories mapped to the given category.  In otherwords, 
+            what category-to-category mappings exists for which this category is 
+            the object of the relation?
+            </summary>
+            <param name="category">The object category of the relations</param>
+            <returns>A list of subject categories</returns>
+            <exception cref="T:Terra.ServerException">The object category does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.MappedHeadings(Terra.Category)">
+            <summary>
+            Find the headings mapped to this category.  Like GetMappedFrom, 
+            what heading-to-category mappings exist for which this category
+            is the object of the relation?
+            </summary>
+            <param name="category">The object category</param>
+            <returns>The headings mapped to this category</returns>
+            <exception cref="T:Terra.ServerException">The object category does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.MapCategory(Terra.Category,Terra.Category)">
+            <summary>
+            Map two categories together.  Direction matters:  categories in 
+            the "from" position will inherit properties and options from the
+            "to" category.
+            <para>
+            Note: a future release of the Terra API will support mapping custom
+            relation types between categories, in support of new products and
+            services.  For now, the relation type is "mapped-to".
+            </para>
+            </summary>
+            <param name="from">The subject category, to inherit from the object category</param>
+            <param name="to">The object category</param>
+            <exception cref="T:Terra.ServerException">Either of the categories does not exist or could not be mapped</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.MapHeading(Terra.Heading,Terra.Category)">
+            <summary>
+            Map a heading to a category.  The heading will inherit the properties
+            and options from the category.  Note that you may map a heading to 
+            many different categories, and inherit the sum total of properties 
+            and options from those categories.
+            <para>
+            For reference, the relation between a heading and a category is 
+            defined as "heading-for".
+            </para>
+            </summary>
+            <param name="from">The heading (subject)</param>
+            <param name="to">The category (object)</param>
+            <exception cref="T:Terra.ServerException">Either the category or heading does not exist or could not be mapped</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.UnmapCategory(Terra.Category,Terra.Category)">
+            <summary>
+            Remove the relation between two categories.
+            <para>
+            Note: a future release of the Terra API will support mapping custom
+            relation types between categories, in support of new products and
+            services.  For now, the relation type is "mapped-to".
+            </para>
+            </summary>
+            <param name="from">The subject category</param>
+            <param name="to">The object category</param>
+            <exception cref="T:Terra.ServerException">Either of the categories does not exist or could not be unmapped</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.UnmapHeading(Terra.Heading,Terra.Category)">
+            <summary>
+            Remove the relation between a heading and a category.
+            </summary>
+            <param name="from">The heading (subject)</param>
+            <param name="to">The category (object)</param>
+            <exception cref="T:Terra.ServerException">Either the category or heading does not exist or could not be unmapped</exception>
+        </member>
+        <member name="M:Terra.Service.Categories.Inheritance(Terra.Category)">
+            <summary>
+            Retrieve the full inheritance of properties and options for this
+            category, based on the parent-child relations in taxonomies and the
+            mappings to other categories, based on those categories' own 
+            inheritance.
+            </summary>
+            <param name="category">The category for which to retrieve inheritance</param>
+            <returns>A list of Property objects, with inherited Options included</returns>
+            <exception cref="T:Terra.ServerException">The category does not exist</exception>
+        </member>
+        <member name="T:Terra.Superheading">
+            <summary>
+            Defines a visual grouping of headings.  These superheadings were 
+            designed to limit the number of headings coming back from the server,
+            in order to make them easier to work with, like headings grouped
+            together in rough verticals.
+            </summary>
+        </member>
+        <member name="P:Terra.Superheading.Name">
+            <summary>
+            The name of the superheading
+            </summary>
+        </member>
+        <member name="P:Terra.Superheading.Slug">
+            <summary>
+            An SEO-compliant slug for the superheading
+            </summary>
+        </member>
+        <member name="P:Terra.Superheading.External">
+            <summary>
+            A third-party identifier for the superheading
+            </summary>
+        </member>
+        <member name="P:Terra.Superheading.Language">
+            <summary>
+            The language of the superheading's name
+            </summary>
+        </member>
+        <member name="P:Terra.Superheading.Opco">
+            <summary>
+            The operating company to which this superheading belongs
+            </summary>
+        </member>
+        <member name="P:Terra.Superheading.Version">
+            <summary>
+            An internal tracking code used to ensure that updates by the client
+            do not overwrite changes made on the server between the time the
+            client version of this superheading was retrieved and when it was 
+            written
+            </summary>
+        </member>
+        <member name="T:Terra.ServerException">
+            <summary>
+            Thrown when the Terra REST server returns an error.
+            </summary>
+        </member>
+        <member name="P:Terra.ServerException.Status">
+            <summary>
+            The HTTP status code returned by the Terra server.  Terra uses the
+            HTTP status codes to indicate the error state that generated the
+            problem.  You can use these error codes to interpret the problem
+            and respond appropriately.
+            
+            It should be noted that the error messages returned from Terra are
+            designed to be "human-friendly", and in many cases may simply be
+            displayed directly to the end user.  For those cases where you need
+            to take additional action, checking the Status can be helpful.
+            </summary>
+        </member>
+        <member name="P:Terra.ServerException.Duplicate">
+            <summary>
+            When trying to create a meme like a category or option, and a duplicate
+            slug is found already existing in Terra, a Conflict is raised and
+            returned.  When this happens, the conflicting meme is returned with
+            the error message, and will be included in the Duplicate property of
+            the exception.
+            </summary>
+        </member>
+        <member name="T:Terra.Option">
+            <summary>
+            An idea or keyword associated with one or more categories via a
+            property.  The combination of an option and its property provide
+            a meaningful piece of information about a category, which is then
+            inherited by any child categories or mapped headings.  
+            <para>
+            While an option's slug must be unique to an operating company, its
+            name need not be.  This can be used to keep an option distinct in
+            meaning that shares common spelling with other options (homynyms).
+            For example, two options may be named "Helmet", while one has the
+            slug "bicycle-helmet" and the other has the slug "motorcycle-helmet".
+            </para>
+            </summary>
+        </member>
+        <member name="P:Terra.Option.Name">
+            <summary>
+            A name for this option; need not be unique
+            </summary>
+        </member>
+        <member name="P:Terra.Option.Slug">
+            <summary>
+            An SEO-compliant slug for the option; must be unique in the context
+            of an operating company
+            </summary>
+        </member>
+        <member name="P:Terra.Option.External">
+            <summary>
+            A third-party external identifier for the option; we try to keep
+            this unique, but it is not required nor enforced by Terra
+            </summary>
+        </member>
+        <member name="P:Terra.Option.Language">
+            <summary>
+            The language of the option name
+            </summary>
+        </member>
+        <member name="P:Terra.Option.Opco">
+            <summary>
+            The operating company with which this option is associated
+            </summary>
+        </member>
+        <member name="P:Terra.Option.Version">
+            <summary>
+            An internal tracking code used to ensure that updates by the client
+            do not overwrite changes made on the server between the time the
+            client version of this option was retrieved and when it was 
+            written
+            </summary>
+        </member>
+        <member name="T:Terra.User">
+            <summary>
+            A user account on the Terra server.
+            </summary>
+        </member>
+        <member name="P:Terra.User.Login">
+            <summary>
+            A user's account login
+            </summary>
+        </member>
+        <member name="P:Terra.User.Email">
+            <summary>
+            A user's email address
+            </summary>
+        </member>
+        <member name="P:Terra.User.Disabled">
+            <summary>
+            Has this account been disabled?  If so, the user will not be 
+            allowed to authenticate and use Terra.
+            </summary>
+        </member>
+        <member name="P:Terra.User.UserCredentials">
+            <summary>
+            User credentials are generated by the server on login, and only
+            available to the user himself.  They are used for subsequent calls
+            to the Terra API, to reduce the password being passed around too
+            frequently.
+            
+            A future release will likely change the credentials from their
+            random nature to an encrypted Hmac value, similar to Amazon.
+            </summary>
+        </member>
+        <member name="T:Terra.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Terra.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Terra.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="T:Terra.Category">
+            <summary>
+            A taxonomic category designed around tight ontological principles.  A
+            category tends to have a stricter definition than an operating company
+            heading.  Categories are defined by the properties and options associated 
+            with them, and any heading mapped to a category inherits that category's
+            properties and options, as well as the properties and options of the
+            category's parents.
+            </summary>
+        </member>
+        <member name="P:Terra.Category.Name">
+            <summary>
+            The name of the category; need not be unique
+            </summary>
+        </member>
+        <member name="P:Terra.Category.Slug">
+            <summary>
+            A unique identifier for the category, within the context of the 
+            operating company
+            </summary>
+        </member>
+        <member name="P:Terra.Category.External">
+            <summary>
+            A third-party external identifier for the category, perhaps 
+            referencing back to a unique identifier in another system  Should
+            be unique in the context of the operating company, but this is
+            not enforced.
+            </summary>
+        </member>
+        <member name="P:Terra.Category.Language">
+            <summary>
+            The two-letter ISO language code, indicating the language of the
+            name of this category
+            </summary>
+        </member>
+        <member name="P:Terra.Category.Opco">
+            <summary>
+            A three or four letter code indicating the operating company with
+            which this category is associated
+            </summary>
+        </member>
+        <member name="P:Terra.Category.Version">
+            <summary>
+            An internal tracking code used to ensure that updates by the client
+            do not overwrite changes made on the server between the time the
+            client version of this category was retrieved and when it was 
+            written
+            </summary>
+        </member>
+        <member name="T:Terra.Service.Headings">
+            <summary>
+            Functions around modifying and mapping headings.
+            <para>
+            Note that if you're looking for functions around mapping things TO a 
+            heading, they do not exist.  Terra 2 does not support mapping objects
+            to headings, only mapping headings to other objects, such as categories.
+            </para>
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.Headings.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.Headings"/>
+        </member>
+        <member name="M:Terra.Service.Headings.All(System.String)">
+            <summary>
+            Get all the headings associated with the given operating company.
+            This request can take a while, given the large number of headings
+            associated with each operating company.
+            </summary>
+            <param name="opco">The operating company to look towards for headings</param>
+            <returns>A list of Heading objects</returns>
+            <exception cref="T:Terra.ServerException">The given operating company does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.Get(System.String,System.String)">
+            <summary>
+            Look for details about a specific heading.  Note that this call 
+            simply returns the basic information, such as the name and language
+            of the heading.  It does not return mappings.
+            <para>
+            It is useful for confirming the existence of a heading.
+            </para>
+            </summary>
+            <param name="opco">The three or four letter code for the operating company, e.g. "PKT"</param>
+            <param name="pid">The PID identifier for the heading, unique to the operating company</param>
+            <returns>A heading</returns>
+            <exception cref="T:Terra.ServerException">Either the operating company or heading does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.Create(System.String,System.String,System.String,System.String,Terra.Superheading)">
+            <summary>
+            Create a new heading for the given operating company.  The heading
+            name need not be unique, but its PID must be.  
+            <para>
+            If the PID is not provided (either null or an empty string), it will
+            be created by transforming the name of the heading into an SEO-ready
+            value.  For example, the name "Mexican Restaurants" would be transformed 
+            into "mexican-restaurants".
+            </para>
+            <para>
+            If language is not supplied it will default to the language of the
+            operating company.
+            </para>
+            </summary>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <param name="name">The name of the heading</param>
+            <param name="pid">A unique identifier for the heading, or null to have one generated</param>
+            <param name="language">The language of the heading, or null to use the opco's language</param>
+            <param name="parent">A superheading, to add this new heading directly to a superheading</param>
+            <returns>The newly created Heading object</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the PID already exists, returns a status of Conflict.</description>
+            </item>
+            <item>
+            <description>If the operating company or superheading does not exist, returns a status of Not Found.</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Headings.Update(Terra.Heading)">
+            <summary>
+            Update's the name and language of the given heading with the server. 
+            Will not change the PID or operating company however.  If you modify
+            either of those, mostly likely you will receive a Not Found status in
+            the ServerException, indicating the heading object could not be found
+            on the Terra server.
+            <para>
+            Note that this method will return a new Heading object.  The original
+            object will not be modified.
+            </para>
+            </summary>
+            <param name="heading">An existing heading with its name or language modified</param>
+            <returns>A new Heading object with the updated information, as confirmation</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the existing heading could not be found on the server, returns a status of Not Found</description>
+            </item>
+            <item>
+            <description>If the local heading is older than the version on the server, a Precondition Failed status is returned</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Headings.Delete(Terra.Heading)">
+            <summary>
+            Completely deletes the given heading from the Terra server.  
+            <para>
+            This method returns nothing.  If the delete is unsuccessful, an
+            exception will be raised.  Otherwise it completed successfully.
+            </para>
+            </summary>
+            <param name="heading">The heading to delete; only Opco and Pid are used</param>
+            <exception cref="T:Terra.ServerException">
+            Raises a Not Found exception if the heading does not exist, or
+            a Precondition Failed if the heading on the server is newer than
+            the one submitted.
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Headings.Synonyms(Terra.Heading)">
+            <summary>
+            Get the list of synonyms associated with this heading.
+            </summary>
+            <param name="heading">The heading</param>
+            <returns>A list of synonyms</returns>
+            <exception cref="T:Terra.ServerException">The heading does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.CreateSynonym(Terra.Heading,System.String,System.String,System.String)">
+            <summary>
+            Create a new synonym and associate it with this heading.
+            <para>
+            Synonyms may also be used as a simple translation tool.  When you
+            create a synonym, by default it is assigned to the same langauge as
+            the operating company.  However, by assigning a different language
+            to the synonym, you now have a translation for the heading.
+            </para>
+            </summary>
+            <param name="heading">The heading to associate with the synonym</param>
+            <param name="name">The human-readable name of the synonym</param>
+            <param name="slug">An SEO-compliant slug for the synonym; generated if not provided</param>
+            <param name="language">The language of the name; defaults to the opco's language</param>
+            <returns>The newly created Synonym</returns>
+            <exception cref="T:Terra.ServerException">The heading does not exist, or the synonym already exists</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.AddSynonym(Terra.Heading,Terra.Synonym)">
+            <summary>
+            Associate an existing synonym with a heading.
+            </summary>
+            <param name="heading">The heading with which to associate the synonym</param>
+            <param name="synonym">The synonym for the heading</param>
+            <exception cref="T:Terra.ServerException">Either the heading or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.AddSynonym(Terra.Heading,System.String,System.String)">
+            <summary>
+            This is a convenience method to create or add an existing synonym
+            (or translation) to a heading.  If the synonym does not already
+            exist, it is created with a default slug (and default language, if
+            not otherwise indicated).  The synonym, existing or new, is
+            associated with the heading.
+            </summary>
+            <param name="heading">The heading to associate with this synonym</param>
+            <param name="synonym">The new or existing name of a synonym</param>
+            <param name="language">The language of the synonym; defaults to the opco's language</param>
+            <returns>The new or existing synonym</returns>
+            <exception cref="T:Terra.ServerException">The heading does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.RemoveSynonym(Terra.Heading,Terra.Synonym)">
+            <summary>
+            Remove the synonym with from the heading.  Note that this doesn't
+            delete the synonym, simply removes its association from this 
+            heading.
+            </summary>
+            <param name="heading">The heading with which to disassociate the synonym</param>
+            <param name="synonym">The synonym for the heading</param>
+            <exception cref="T:Terra.ServerException">Either the heading or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.Parents(Terra.Heading)">
+            <summary>
+            Get the superheadings to which this heading belongs.
+            </summary>
+            <param name="heading">The child heading</param>
+            <returns>A list of Superheadings</returns>
+        </member>
+        <member name="M:Terra.Service.Headings.MappedTo(Terra.Heading)">
+            <summary>
+            Look for the categories to which the given heading has been mapped.
+            In otherwords, what heading-to-category mappings exists for which 
+            this heading is the subject of the relation?
+            </summary>
+            <param name="heading">The subject heading of the relations</param>
+            <returns>A list of object categories</returns>
+            <exception cref="T:Terra.ServerException">The subject heading does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.MapHeading(Terra.Heading,Terra.Category)">
+            <summary>
+            Map a heading to a category.  The heading will inherit the properties
+            and options from the category.  Note that you may map a heading to 
+            many different categories, and inherit the sum total of properties 
+            and options from those categories.
+            <para>
+            For reference, the relation between a heading and a category is 
+            defined as "heading-for".
+            </para>
+            <para>
+            This is just a convenience method that does the exact same thing as
+            Terra.Client.Categories.MapHeading.
+            </para>
+            </summary>
+            <seealso cref="M:Terra.Service.Categories.MapHeading(Terra.Heading,Terra.Category)"/>
+            <param name="from">The heading (subject)</param>
+            <param name="to">The category (object)</param>
+            <exception cref="T:Terra.ServerException">Either the heading or the category does not exist or could not be mapped</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.UnmapHeading(Terra.Heading,Terra.Category)">
+            <summary>
+            Remove the relation between a heading and a category.
+            <para>
+            This is just a convenience method that does the exact same thing as
+            Terra.Client.Categories.UnapHeading.
+            </para>
+            </summary>
+            <seealso cref="M:Terra.Service.Categories.UnmapHeading(Terra.Heading,Terra.Category)"/>
+            <param name="from">The heading (subject)</param>
+            <param name="to">The category (object)</param>
+            <exception cref="T:Terra.ServerException">Either the category or heading does not exist or could not be unmapped</exception>
+        </member>
+        <member name="M:Terra.Service.Headings.Inheritance(Terra.Heading)">
+            <summary>
+            Retrieve the full inheritance of properties and options for this
+            heading, based on the mappings to other categories and those 
+            categories' own inheritance.
+            </summary>
+            <param name="heading">The heading for which to retrieve inheritance</param>
+            <returns>A list of Property objects, with inherited Options included</returns>
+            <exception cref="T:Terra.ServerException">The heading does not exist</exception>
+        </member>
+        <member name="T:Terra.OperatingCompany">
+            <summary>
+            A European Directories operating company, such as PKT or Fonecta.  Each
+            operating company is identified by a three or four letter code, such as
+            "PKT" or "FON", which is used in most requests to the server.  
+            <para>
+            This object is here merely as a convenience.  Typically you just pass
+            around the operating company's slug/code.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Terra.OperatingCompany.Name">
+            <summary>
+            The full name of the operating company.
+            </summary>
+        </member>
+        <member name="P:Terra.OperatingCompany.Slug">
+            <summary>
+            The three or four letter identification code for the operating
+            company, e.g. "PKT".
+            </summary>
+        </member>
+        <member name="P:Terra.OperatingCompany.Language">
+            <summary>
+            The two character default ISO language for the operating company,
+            such as "en" or "pl".
+            </summary>
+        </member>
+        <member name="T:Terra.Taxonomy">
+            <summary>
+            A collection of categories within an operating company.  Taxonomies
+            may act as categories in many situations as well.  For example, a
+            taxonomy may have properties and options associated with it.  Any
+            options associated with a taxonomy will be inherited by all of the
+            categories in the taxonomy.
+            </summary>
+        </member>
+        <member name="P:Terra.Taxonomy.Name">
+            <summary>
+            The name of the taxonomy
+            </summary>
+        </member>
+        <member name="P:Terra.Taxonomy.Slug">
+            <summary>
+            An identifier for the taxonomy, unique in the context of the 
+            operating company
+            </summary>
+        </member>
+        <member name="P:Terra.Taxonomy.Language">
+            <summary>
+            The default language for the taxonomy
+            </summary>
+        </member>
+        <member name="P:Terra.Taxonomy.Opco">
+            <summary>
+            The code for the operating company with which this taxonomy is 
+            associated
+            </summary>
+        </member>
+        <member name="P:Terra.Taxonomy.Version">
+            <summary>
+            Used internally by the server to verify the information local to 
+            the client is not out of date with what is on the server.  If 
+            version values on the client and server do not match when a taxonomy
+            is modified, an exception will be thrown.
+            </summary>
+        </member>
+        <member name="T:Terra.Service.Properties">
+            <summary>
+            Properties represent the relations between an option and a category or
+            taxonomy.  
+            <para>
+            In fact, properties do not truly relate options to categories or
+            taxonomies.  Rather, the relation between an option and a category
+            is identified by a type of relation--what we refer to as a "verb".
+            Associating a property with this relation means creating a property
+            that has the same slug as this verb.  The property then represents
+            the relation between the category and option.
+            </para>
+            <para>
+            Associating the property with a category or taxonomy also allows
+            for a visual indicator to users as to the possible properties used
+            in that category or taxonomy.  And properties are used as a filter,
+            to isolate these random verbs from the specific relations used to
+            model behaviors in Terra, such as "mapped-to" or "child-of".  It
+            should also be noted these reserved relations are not permitted
+            to be created as properties.
+            </para>
+            <para>
+            Due to the complex relationship between a Property, a "verb" and
+            categories, taxonomies, and options, properties may not be deleted.
+            They may be created and renamed, but not removed.  A future release
+            may support the removal of properties, but for now the safest course
+            of action is to simply limit the destruction of properties.
+            </para>
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.Properties.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.Properties"/>
+        </member>
+        <member name="M:Terra.Service.Properties.All(System.String)">
+            <summary>
+            Retrieve all the currently defined properties for the entire
+            operating company.
+            </summary>
+            <param name="opco">The three or four letter code for the opco</param>
+            <returns>A list of Property objects</returns>
+            <exception cref="T:Terra.ServerException">The operating company does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Properties.Get(System.String,System.String)">
+            <summary>
+            Look up a property by its slug.  Useful for checking to see if a
+            property exists.
+            </summary>
+            <param name="opco">The three or four letter code for the opco</param>
+            <param name="slug">The property's slug</param>
+            <returns>A Property object</returns>
+            <exception cref="T:Terra.ServerException">The operating company or property does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Properties.Create(System.String,System.String,System.String,System.String,System.String,Terra.Node)">
+            <summary>
+            Create a new property.  Typically a property is created as it is 
+            needed, and associated with a category or taxonomy so it can be
+            used to map options to either of those memes.  If you include the
+            relatedTo, it will automatically map the property to that meme.
+            <para>
+            The taxonomy or category to which you are relating this property
+            must exist in the same operating company as the property.
+            </para>
+            <para>
+            The property's slug will be generated from the name if not otherwise
+            indicated.
+            </para>
+            </summary>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <param name="name">The human-readable name for this property</param>
+            <param name="slug">The relation type, or "verb" for this property</param>
+            <param name="external">An third-party external identifier for this property (optional)</param>
+            <param name="language">The two-letter ISO language for the property; defaults to the opco's language</param>
+            <param name="relatedTo">The category or taxonomy using this property (optional)</param>
+            <returns>The newly created Property</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the slug already exists, returns a status of Conflict.</description>
+            </item>
+            <item>
+            <description>If the operating company or relatedTo does not exist, returns a status of Not Found.</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Properties.Update(Terra.Property)">
+            <summary>
+            Update the name, external identifier, or language for this property.  
+            Neither the operating company nor the slug may be modified.
+            </summary>
+            <param name="property">A property with the updated information</param>
+            <returns>A new Property object, with the updates in place</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the existing property could not be found on the server, returns a status of Not Found</description>
+            </item>
+            <item>
+            <description>If the local property is older than the version on the server, a Precondition Failed status is returned</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Properties.Synonyms(Terra.Property)">
+            <summary>
+            Get the list of synonyms associated with this property.
+            </summary>
+            <param name="property">The property</param>
+            <returns>A list of synonyms</returns>
+            <exception cref="T:Terra.ServerException">The property does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Properties.CreateSynonym(Terra.Property,System.String,System.String,System.String)">
+            <summary>
+            Create a new synonym and associate it with this property.
+            <para>
+            Synonyms may also be used as a simple translation tool.  When you
+            create a synonym, by default it is assigned to the same langauge as
+            the operating company.  However, by assigning a different language
+            to the synonym, you now have a translation for the property.
+            </para>
+            </summary>
+            <param name="property">The property to associate with the synonym</param>
+            <param name="name">The human-readable name of the synonym</param>
+            <param name="slug">An SEO-compliant slug for the synonym; generated if not provided</param>
+            <param name="language">The language of the name; defaults to the opco's language</param>
+            <returns>The newly created Synonym</returns>
+            <exception cref="T:Terra.ServerException">The property does not exist, or the synonym already exists</exception>
+        </member>
+        <member name="M:Terra.Service.Properties.AddSynonym(Terra.Property,Terra.Synonym)">
+            <summary>
+            Associate an existing synonym with a property.
+            </summary>
+            <param name="property">The property with which to associate the synonym</param>
+            <param name="synonym">The synonym for the property</param>
+            <exception cref="T:Terra.ServerException">Either the property or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Properties.AddSynonym(Terra.Property,System.String,System.String)">
+            <summary>
+            This is a convenience method to create or add an existing synonym
+            (or translation) to a property.  If the synonym does not already
+            exist, it is created with a default slug (and default language, if
+            not otherwise indicated).  The synonym, existing or new, is
+            associated with the property.
+            </summary>
+            <param name="property">The property to associate with this synonym</param>
+            <param name="synonym">The new or existing name of a synonym</param>
+            <param name="language">The language of the synonym; defaults to the opco's language</param>
+            <returns>The new or existing synonym</returns>
+            <exception cref="T:Terra.ServerException">The property does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Properties.RemoveSynonym(Terra.Property,Terra.Synonym)">
+            <summary>
+            Remove the synonym with from the property.  Note that this doesn't
+            delete the synonym, simply removes its association from this 
+            property.
+            </summary>
+            <param name="property">The property with which to disassociate the synonym</param>
+            <param name="synonym">The synonym for the property</param>
+            <exception cref="T:Terra.ServerException">Either the property or the synonym doesn't exist</exception>
+        </member>
+        <member name="T:Terra.Client">
+            <summary>
+            Every request to the Terra server should come through the client class 
+            or one of its service offspring.
+            <para>
+            You should use a single instance of Terra.Client for each user, as 
+            the user's credentials for accessing the API are stored within the
+            client upon successful authentication.  The Terra.Client is 
+            thread-safe, so you may reuse it as such, but only for the same
+            user account.  We recommend authenticating on a single thread, so
+            as not to unintentionally overwrite the credentials of an 
+            authenticated user.  The next time you authenticate the same instance 
+            of Terra.Client, it will replace the credentials with those of the
+            newly authenticated user.  This could obviously cause security and
+            tracking issues.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Terra.Client.#ctor(System.String)">
+            <summary>
+            Create a new connection to the Terra REST server.  Each user should have
+            his or her own connection to the server.  While the Client class is 
+            thread-safe, do not share instances between users.
+            </summary>
+            <param name="url">The base URL to the REST server, e.g. http://terra.brilliantarc.com/api</param>
+        </member>
+        <member name="M:Terra.Client.Request(System.String,RestSharp.Method)">
+            <summary>
+            Build and send a RESTful JSON request to the Terra API server, and then
+            parse ther results.
+            <para>
+            This is used internally by the various service classes to call the Terra
+            API server.  It is a low-level call.  You are welcome to reuse it to call
+            services directly, should the need arise, but for general applications
+            you shouldn't have to.
+            </para>
+            </summary>
+            <param name="resource">The path to the resource on the Terra server, e.g. "properties", or "category/properties"</param>
+            <param name="method">Sends the request as this HTTP method; defaults to Method.GET</param>
+            <returns>The request object, which you should then make AddParameter calls with and finally a MakeRequest, GenericRequest, or StringRequest</returns>
+        </member>
+        <member name="M:Terra.Client.Authenticate(System.String,System.String)">
+            <summary>
+            Authenticate a user's account information for this connection.  Again, 
+            there should only be a single user account per connection.  If you 
+            authenticate another user account, it will replace the previous account
+            information in this instance.
+            </summary>
+            <param name="login">The user's account login</param>
+            <param name="password">The user's account password</param>
+            <returns>An instance of the Client object, so you can chain calls</returns>
+        </member>
+        <member name="M:Terra.Client.Search(System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.Int32,System.Int32)">
+            <summary>
+            Perform a free-text search for categories, properties, options, etc. 
+            in Terra.  Will return a SearchResult object which contains not only
+            the matches for the search, but information about refinements and
+            the total number of results possible.
+            <para>
+            Searches are localized to the various languages, in order to apply
+            language-specific stemming and other operations.  While you may 
+            search across operating companies, you may not search across 
+            languages.  Unfortunately this is a limitation of the search engine
+            used in Terra.
+            </para>
+            </summary>
+            <param name="language">The language in which to conduct the search</param>
+            <param name="terms">A set of keywords or phrases to search for</param>
+            <param name="definitions">Limit the search to memes of this type, e.g. ["Categories", "Taxonomies"]</param>
+            <param name="opco">Limit the search to a specific opco</param>
+            <param name="from">Start from this result number (defaults to the beginning, 0; for pagination)</param>
+            <param name="max">Limit the number of results to this number, at most (defaults to 10; for pagination)</param>
+            <returns>A collection of memes (categories, taxonomies, options), in order of search relevance</returns>
+        </member>
+        <member name="M:Terra.Client.Slugify(System.String)">
+            <summary>
+            Use the Terra server to generate an SEO-compliant slug based on the
+            given string value.  
+            </summary>
+            <param name="value">The value to "slugify"</param>
+            <returns>A slug based on the give value, with spaces and punctuation replaced with dashes</returns>
+        </member>
+        <member name="M:Terra.Client.UUID">
+            <summary>
+            Generate a globally unique identifier on the server.  Sometimes this
+            can be handy to have around.
+            </summary>
+            <returns>A globally unique ID, in the context of the Terra server</returns>
+        </member>
+        <member name="P:Terra.Client.User">
+            <summary>
+            The currently authenticated user account
+            </summary>
+        </member>
+        <member name="P:Terra.Client.OperatingCompanies">
+            <summary>
+            A reference to service calls relating to operating companies.
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Taxonomies">
+            <summary>
+            A reference to service calls relating to taxonomies.
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Categories">
+            <summary>
+            A reference to service calls relating to categories.
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Properties">
+            <summary>
+            A reference to service calls relating to properties.
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Options">
+            <summary>
+            A reference to service calls relating to options.
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Synonyms">
+            <summary>
+            A reference to service calls relating to synonyms (most relevant 
+            calls relating to synonyms are on the various Taxonomies, Categories,
+            Options, and other similar services).
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Headings">
+            <summary>
+            A reference to service calls relating to headings.
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Superheadings">
+            <summary>
+            A reference to service calls relating to superheadings.
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Users">
+            <summary>
+            Services for managing user accounts, forgotten passwords, messages,
+            etc.
+            </summary>
+        </member>
+        <member name="P:Terra.Client.Base">
+            <summary>
+            Reference to the original RestSharp RestClient object
+            </summary>
+        </member>
+        <member name="T:Terra.Service.Users">
+            <summary>
+            Manage user accounts.  You may also use this service to interact with
+            users.
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.Users.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.Users"/>
+        </member>
+        <member name="T:Terra.Service.Taxonomies">
+            <summary>
+            Service API calls relating to taxonomies.  
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.Taxonomies.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.Taxonomies"/>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.All(System.String)">
+            <summary>
+            Look up the taxonomies currently available for the given operating 
+            company.
+            </summary>
+            <param name="opco">The three or four letter code for the operating company, e.g. "PKT"</param>
+            <returns>A list of Taxonomy object</returns>
+            <exception cref="T:Terra.ServerException">The operating company suggested does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.Get(System.String,System.String)">
+            <summary>
+            Look for details about a specific taxonomy.  Note that this call 
+            simply returns the basic information, such as the name and language
+            of the taxonomy.  It does not return child categories or mappings.
+            
+            It is useful for confirming the existence of a taxonomy.
+            </summary>
+            <param name="opco">The three or four letter code for the operating company, e.g. "PKT"</param>
+            <param name="slug">The slug identifier for the taxonomy, unique to the operating company</param>
+            <returns>A Taxonomy</returns>
+            <exception cref="T:Terra.ServerException">Either the operating company or taxonomy does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.Create(System.String,System.String,System.String,System.String)">
+            <summary>
+            Create a new taxonomy for the given operating company.  The taxonomy
+            name need not be unique, but its (optional) slug must be.  
+            
+            If the slug is not provided (either null or an empty string), it will
+            be created by transforming the name of the taxonomy into an SEO-ready
+            value.  For example, the name "Travel, Accommodations, and Food 
+            Services" would be transformed into "travel-accommodation-and-food-services".
+            
+            If language is not supplied it will default to the language of the
+            operating company.
+            </summary>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <param name="name">The name of the taxonomy</param>
+            <param name="slug">A unique identifier for the taxonomy, or null to have one generated</param>
+            <param name="language">The language of the taxonomy, or null to use the opco's language</param>
+            <returns>The newly created Taxonomy object</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the slug already exists, returns a status of Conflict.</description>
+            </item>
+            <item>
+            <description>If the operating company does not exist, returns a status of Not Found.</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.Update(Terra.Taxonomy)">
+            <summary>
+            Update's the name and language of the given Taxonomy with the server. 
+            Will not change the slug or operating company however.  If you modify
+            either of those, mostly likely you will receive a Not Found status in
+            the ServerException, indicating the Taxonomy object could not be found
+            on the Terra server.
+            
+            Note that this method will return a new Taxonomy object.  The original
+            object will not be modified.
+            </summary>
+            <param name="taxonomy">An existing taxonomy with its name or language modified</param>
+            <returns>A new Taxonomy object with the updated information, as confirmation</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the existing taxonomy could not be found on the server, returns a status of Not Found</description>
+            </item>
+            <item>
+            <description>If the local taxonomy is older than the version on the server, a Precondition Failed status is returned</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.Delete(Terra.Taxonomy)">
+            <summary>
+            Completely deletes the given taxonomy from the Terra server.  If
+            there are any categories associated with the taxonomy, they are
+            orphaned, as are any properties and options associated with the
+            taxonomy.
+            
+            This method returns nothing.  If the delete is unsuccessful, an
+            exception will be raised.  Otherwise it completed successfully.
+            </summary>
+            <param name="taxonomy">The taxonomy to delete; only Opco and Slug are used</param>
+            <exception cref="T:Terra.ServerException">
+            Raises a Not Found exception if the taxonomy does not exist, or
+            a Precondition Failed if the taxonomy on the server is newer than
+            the one submitted.
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.Synonyms(Terra.Taxonomy)">
+            <summary>
+            Get the list of synonyms associated with this taxonomy.
+            </summary>
+            <param name="taxonomy">The taxonomy</param>
+            <returns>A list of synonyms</returns>
+            <exception cref="T:Terra.ServerException">The taxonomy does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.CreateSynonym(Terra.Taxonomy,System.String,System.String,System.String)">
+            <summary>
+            Create a new synonym and associate it with this taxonomy.
+            
+            Synonyms may also be used as a simple translation tool.  When you
+            create a synonym, by default it is assigned to the same langauge as
+            the operating company.  However, by assigning a different language
+            to the synonym, you now have a translation for the taxonomy.
+            </summary>
+            <param name="taxonomy">The taxonomy to associate with the synonym</param>
+            <param name="name">The human-readable name of the synonym</param>
+            <param name="slug">An SEO-compliant slug for the synonym; generated if not provided</param>
+            <param name="language">The language of the name; defaults to the opco's language</param>
+            <returns>The newly created Synonym</returns>
+            <exception cref="T:Terra.ServerException">The taxonomy does not exist, or the synonym already exists</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.AddSynonym(Terra.Taxonomy,Terra.Synonym)">
+            <summary>
+            Associate an existing synonym with a taxonomy.
+            </summary>
+            <param name="taxonomy">The taxonomy with which to associate the synonym</param>
+            <param name="synonym">The synonym for the taxonomy</param>
+            <exception cref="T:Terra.ServerException">Either the taxonomy or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.AddSynonym(Terra.Taxonomy,System.String,System.String)">
+            <summary>
+            This is a convenience method to create or add an existing synonym
+            (or translation) to a taxonomy.  If the synonym does not already
+            exist, it is created with a default slug (and default language, if
+            not otherwise indicated).  The synonym, existing or new, is
+            associated with the taxonomy.
+            </summary>
+            <param name="taxonomy">The taxonomy to associate with this synonym</param>
+            <param name="synonym">The new or existing name of a synonym</param>
+            <param name="language">The language of the synonym; defaults to the opco's language</param>
+            <returns>The new or existing synonym</returns>
+            <exception cref="T:Terra.ServerException">The taxonomy does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.RemoveSynonym(Terra.Taxonomy,Terra.Synonym)">
+            <summary>
+            Remove the synonym with from the taxonomy.  Note that this doesn't
+            delete the synonym, simply removes its association from this 
+            taxonomy.
+            </summary>
+            <param name="taxonomy">The taxonomy with which to disassociate the synonym</param>
+            <param name="synonym">The synonym for the taxonomy</param>
+            <exception cref="T:Terra.ServerException">Either the taxonomy or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.Children(Terra.Taxonomy)">
+            <summary>
+            Get the top-level categories for the given taxonomy.  Note that this
+            does not return all the categories for a taxonomy.
+            
+            This is the same call present in the Terra.Service.Categories class.
+            It is here as a convenience.
+            </summary>
+            <seealso cref="M:Terra.Service.Categories.Children(Terra.Category)"/>
+            <param name="taxonomy">The taxonomy of categories</param>
+            <returns>A list of Category objects</returns>
+            <exception cref="T:Terra.ServerException">The given taxonomy does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.Properties(Terra.Taxonomy)">
+            <summary>
+            Look up the properties associated with the given taxonomy.  The list
+            returned does not include options, and there may be properties in
+            the list that have no options associated with them anyway.
+            </summary>
+            <param name="taxonomy">The taxonomy with which the properties are associated</param>
+            <returns>A list of Property objects</returns>
+            <exception cref="T:Terra.ServerException">The taxonomy does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.AddProperty(Terra.Taxonomy,Terra.Property)">
+            <summary>
+            Associate a property with a taxonomy.  This let's both users and 
+            the software know what properties should be included in queries 
+            such as inheritance.  It also serves as a visual tool for users, 
+            so they know the list of possible properties from which to select 
+            when adding options.
+            </summary>
+            <param name="taxonomy">The taxonomy to which to add the property</param>
+            <param name="property">The property to associate</param>
+            <exception cref="T:Terra.ServerException">Either the property or the taxonomy doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.RemoveProperty(Terra.Taxonomy,Terra.Property)">
+            <summary>
+            Remove a property from a taxonomy.  Note that this does not remove 
+            any of the relations between options and this node.  It does, 
+            however, filter the options from any requests that use the properties 
+            associated with the node as a filter, such as inheritance.
+            </summary>
+            <param name="taxonomy">The taxonomy from which to remove the property</param>
+            <param name="property">The property to remove</param>
+            <exception cref="T:Terra.ServerException">Either the property or the taxonomy doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.Options(Terra.Taxonomy)">
+            <summary>
+            Find all the options associated with this taxonomy.  
+            
+            This operation can be a bit slow, as the system has to filter and 
+            collate options and properties.  It is typically faster to request
+            a list of properties, then request the options for a selected
+            property (this is how the Terra UI does things).  Of course by 
+            "slow", we mean takes around 300ms.
+            </summary>
+            <param name="taxonomy">The taxonomy of options to retrieve</param>
+            <returns>A list of Property objects with their Options list filled</returns>
+            <exception cref="T:Terra.ServerException">The taxonomy doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.AddOption(Terra.Taxonomy,Terra.Property,Terra.Option)">
+            <summary>
+            Add an option to a taxonomy.  The taxonomy, option, and property
+            must all exist in the same operating company.
+            </summary>
+            <param name="taxonomy">The taxonomy to associate the option</param>
+            <param name="property">The property or "verb" used in the relation</param>
+            <param name="option">The option being related</param>
+            <exception cref="T:Terra.ServerException">Either the option, property or the taxonomy doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Taxonomies.RemoveOption(Terra.Taxonomy,Terra.Property,Terra.Option)">
+            <summary>
+            Remove an option from a taxonomy.  The taxonomy, option, and property
+            must all exist in the same operating company.
+            </summary>
+            <param name="taxonomy">The taxonomy from which to remove the option</param>
+            <param name="property">The property or "verb" used in the relation</param>
+            <param name="option">The option being removed</param>
+            <exception cref="T:Terra.ServerException">Either the option, property or the taxonomy doesn't exist</exception>
+        </member>
+        <member name="T:Terra.Service.OperatingCompanies">
+            <summary>
+            API calls relating to operating companies.
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.OperatingCompanies.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.OperatingCompanies"/>
+        </member>
+        <member name="M:Terra.Service.OperatingCompanies.All">
+            <summary>
+            Retrieve the available operating companies from Terra.
+            </summary>
+            <returns>A list of operating companies</returns>
+        </member>
+        <member name="M:Terra.Service.OperatingCompanies.Get(System.String)">
+            <summary>
+            Retrieve the details about an operating company, such as its name 
+            and default language.
+            </summary>
+            <param name="opco">The three or four letter identifier for the operating company</param>
+            <returns>The operating company</returns>
+            <exception cref="T:Terra.ServerException">
+            An operating company does not exist for the given slug
+            </exception>
+        </member>
+        <member name="M:Terra.Service.OperatingCompanies.Taxonomies(System.String)">
+            <summary>
+            Convenience method to return all the taxonomies for an operating
+            company.
+            </summary>
+            <seealso cref="M:Terra.Service.Taxonomies.All(System.String)"/>
+            <param name="opco">The three or four letter operating company code</param>
+            <returns>A list of taxonomies</returns>
+            <exception cref="T:Terra.ServerException">The operating company does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.OperatingCompanies.Properties(System.String)">
+            <summary>
+            Convenience method to return all the properties for an operating
+            company.
+            </summary>
+            <seealso cref="M:Terra.Service.Properties.All(System.String)"/>
+            <param name="opco">The three or four letter operating company code</param>
+            <returns>A list of properties</returns>
+            <exception cref="T:Terra.ServerException">The operating company does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.OperatingCompanies.Superheadings(System.String)">
+            <summary>
+            Convenience method to return all the superheadings for an operating
+            company.
+            </summary>
+            <seealso cref="M:Terra.Service.Superheadings.All(System.String)"/>
+            <param name="opco">The three or four letter operating company code</param>
+            <returns>A list of superheadings</returns>
+            <exception cref="T:Terra.ServerException">The operating company does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.OperatingCompanies.Headings(System.String)">
+            <summary>
+            Convenience method to return all the headings for an operating
+            company.
+            </summary>
+            <seealso cref="M:Terra.Service.Headings.All(System.String)"/>
+            <param name="opco">The three or four letter operating company code</param>
+            <returns>A list of headings</returns>
+            <exception cref="T:Terra.ServerException">The operating company does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.OperatingCompanies.History(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get the history of changes made across the entire operating company,
+            to every category, property, option, taxonomy, heading and even
+            superheading.
+            </summary>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <param name="from">The starting result to return; defaults to the beginning (0)</param>
+            <param name="max">The maximum number of results to return; defaults to 100</param>
+            <returns>The list of changes made to each piece of information in Terra, for this opco</returns>
+        </member>
+        <member name="T:Terra.Heading">
+            <summary>
+            An operating company's business sales heading.  Businesses are sold into
+            a heading, and those headings are then mapped to taxonomic categories
+            for additional information (properties and options).  Headings tend to
+            be broad strokes, sales or market driven, whereas categories follow a
+            stricter physical, ontological definition of information.
+            </summary>
+        </member>
+        <member name="P:Terra.Heading.Name">
+            <summary>
+            The localized name of the heading
+            </summary>
+        </member>
+        <member name="P:Terra.Heading.Pid">
+            <summary>
+            The operating company's identifier for the heading
+            </summary>
+        </member>
+        <member name="P:Terra.Heading.External">
+            <summary>
+            A third-party external identifier for the heading; typically
+            not used, and need not be unique
+            </summary>
+        </member>
+        <member name="P:Terra.Heading.Language">
+            <summary>
+            The language of the heading name
+            </summary>
+        </member>
+        <member name="P:Terra.Heading.Opco">
+            <summary>
+            The three or four letter code for the operating company owning
+            this heading
+            </summary>
+        </member>
+        <member name="P:Terra.Heading.Version">
+            <summary>
+            An internal tracking code used to ensure that updates by the client
+            do not overwrite changes made on the server between the time the
+            client version of this heading was retrieved and when it was 
+            written
+            </summary>
+        </member>
+        <member name="T:Terra.Service.Synonyms">
+            <summary>
+            Some basic functionality in support of synonyms.  Similar to options,
+            most of the true functionality useful surrounding synonyms resides with
+            the other services, such as Terra.Service.Categories.  This service
+            is primarily for updating and mass-deleting synonyms.
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.Synonyms.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.Synonyms"/>
+        </member>
+        <member name="M:Terra.Service.Synonyms.Get(System.String,System.String)">
+            <summary>
+            Look up an synonym by its slug.  Useful for checking to see if an
+            synonym exists.
+            </summary>
+            <param name="opco">The three or four letter code for the opco</param>
+            <param name="slug">The synonyms's slug</param>
+            <returns>An Synonym object</returns>
+            <exception cref="T:Terra.ServerException">The operating company or synonym does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Synonyms.Create(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Create a new synonym.  
+            <para>
+            This will create a "free" synonym in the operating company's 
+            portfolio; the majority of the time this is not what you want.
+            Instead, see the individual category, taxonomy, etc. services for
+            methods to create synonyms and attach them to another meme in the
+            same call.
+            </para>
+            </summary>
+            <seealso cref="M:Terra.Service.Categories.CreateSynonym(Terra.Category,System.String,System.String,System.String)"/>
+            <seealso cref="M:Terra.Service.Taxonomies.CreateSynonym(Terra.Taxonomy,System.String,System.String,System.String)"/>
+            <seealso cref="M:Terra.Service.Properties.CreateSynonym(Terra.Property,System.String,System.String,System.String)"/>
+            <seealso cref="M:Terra.Service.Options.CreateSynonym(Terra.Option,System.String,System.String,System.String)"/>
+            <seealso cref="M:Terra.Service.Headings.CreateSynonym(Terra.Heading,System.String,System.String,System.String)"/>
+            <seealso cref="M:Terra.Service.Superheadings.CreateSynonym(Terra.Superheading,System.String,System.String,System.String)"/>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <param name="name">The human-readable name for this synonym</param>
+            <param name="slug">A unique slug for this synonym; synonymal, will be generated from the name if not provided</param>
+            <param name="external">An third-party external identifier for this synonym (synonymal)</param>
+            <param name="language">The two-letter ISO language for the synonym's name; defaults to the opco's language</param>
+            <returns>The newly created Synonym</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the slug already exists, returns a status of Conflict.</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Synonyms.Update(Terra.Synonym)">
+            <summary>
+            Update the name, external identifier, or language for this synonym.  
+            Neither the operating company nor the slug may be modified.
+            </summary>
+            <param name="synonym">An synonym with the updated information</param>
+            <returns>A new Synonym object, with the updates in place</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the existing synonym could not be found on the server, returns a status of Not Found</description>
+            </item>
+            <item>
+            <description>If the local synonym is older than the version on the server, a Precondition Failed status is returned</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Synonyms.Delete(Terra.Synonym)">
+            <summary>
+            Completely delete an synonym from Terra.  This will remove the synonym 
+            from every meme it is related to in the operating company.  In most
+            cases, you'll likely want something along the lines of 
+            Terra.Service.Categories.RemoveSynonym instead.
+            </summary>
+            <seealso cref="M:Terra.Service.Categories.RemoveSynonym(Terra.Category,Terra.Synonym)"/>
+            <seealso cref="M:Terra.Service.Taxonomies.RemoveSynonym(Terra.Taxonomy,Terra.Synonym)"/>
+            <seealso cref="M:Terra.Service.Properties.RemoveSynonym(Terra.Property,Terra.Synonym)"/>
+            <seealso cref="M:Terra.Service.Options.RemoveSynonym(Terra.Option,Terra.Synonym)"/>
+            <seealso cref="M:Terra.Service.Headings.RemoveSynonym(Terra.Heading,Terra.Synonym)"/>
+            <seealso cref="M:Terra.Service.Superheadings.RemoveSynonym(Terra.Superheading,Terra.Synonym)"/>
+            <param name="synonym">The synonym to delete</param>
+            <exception cref="T:Terra.ServerException">The synonym does not exist</exception>
+        </member>
+        <member name="T:Terra.Service.Options">
+            <summary>
+            Modify and interact with options on a category or taxonomy.  Much of the
+            functionality for mapping options to categories and taxonomies resides
+            in those services, e.g. Terra.Service.Categories.AddOption.  
+            Functionality here focuses on creating, updating, and deleting options.
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.Options.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.Options"/>
+            <seealso cref="T:Terra.Service.Categories"/>
+            <seealso cref="T:Terra.Service.Taxonomies"/>
+        </member>
+        <member name="M:Terra.Service.Options.Get(System.String,System.String)">
+            <summary>
+            Look up an option by its slug.  Useful for checking to see if an
+            option exists.
+            </summary>
+            <param name="opco">The three or four letter code for the opco</param>
+            <param name="slug">The options's slug</param>
+            <returns>An Option object</returns>
+            <exception cref="T:Terra.ServerException">The operating company or option does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Options.Create(System.String,System.String,System.String,System.String,System.String,Terra.Node,Terra.Property)">
+            <summary>
+            Create a new option.  
+            </summary>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <param name="name">The human-readable name for this option</param>
+            <param name="slug">A unique slug for this option; optional, will be generated from the name if not provided</param>
+            <param name="external">An third-party external identifier for this option (optional)</param>
+            <param name="language">The two-letter ISO language for the option's name; defaults to the opco's language</param>
+            <param name="relatedTo">The category or taxonomy using this option (optional)</param>
+            <param name="relatedBy">The property by which this option is related to the relatedTo value</param>
+            <returns>The newly created Option</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the slug already exists, returns a status of Conflict.</description>
+            </item>
+            <item>
+            <description>If the operating company, relatedTo, or relatedBy does not exist, returns a status of Not Found.</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Options.Update(Terra.Option)">
+            <summary>
+            Update the name, external identifier, or language for this option.  
+            Neither the operating company nor the slug may be modified.
+            </summary>
+            <param name="option">An option with the updated information</param>
+            <returns>A new Option object, with the updates in place</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the existing option could not be found on the server, returns a status of Not Found</description>
+            </item>
+            <item>
+            <description>If the local option is older than the version on the server, a Precondition Failed status is returned</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Options.Delete(Terra.Option)">
+            <summary>
+            Completely delete an option from Terra.  This will remove the option 
+            from every category and taxonomy in the operating company.
+            </summary>
+            <param name="option">The option to delete</param>
+            <exception cref="T:Terra.ServerException">The option does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Options.Synonyms(Terra.Option)">
+            <summary>
+            Get the list of synonyms associated with this option.
+            </summary>
+            <param name="option">The option</param>
+            <returns>A list of synonyms</returns>
+            <exception cref="T:Terra.ServerException">The option does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Options.CreateSynonym(Terra.Option,System.String,System.String,System.String)">
+            <summary>
+            Create a new synonym and associate it with this option.
+            <para>
+            Synonyms may also be used as a simple translation tool.  When you
+            create a synonym, by default it is assigned to the same langauge as
+            the operating company.  However, by assigning a different language
+            to the synonym, you now have a translation for the option.
+            </para>
+            </summary>
+            <param name="option">The option to associate with the synonym</param>
+            <param name="name">The human-readable name of the synonym</param>
+            <param name="slug">An SEO-compliant slug for the synonym; generated if not provided</param>
+            <param name="language">The language of the name; defaults to the opco's language</param>
+            <returns>The newly created Synonym</returns>
+            <exception cref="T:Terra.ServerException">The option does not exist, or the synonym already exists</exception>
+        </member>
+        <member name="M:Terra.Service.Options.AddSynonym(Terra.Option,Terra.Synonym)">
+            <summary>
+            Associate an existing synonym with a option.
+            </summary>
+            <param name="option">The option with which to associate the synonym</param>
+            <param name="synonym">The synonym for the option</param>
+            <exception cref="T:Terra.ServerException">Either the option or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Options.AddSynonym(Terra.Option,System.String,System.String)">
+            <summary>
+            This is a convenience method to create or add an existing synonym
+            (or translation) to a option.  If the synonym does not already
+            exist, it is created with a default slug (and default language, if
+            not otherwise indicated).  The synonym, existing or new, is
+            associated with the option.
+            </summary>
+            <param name="option">The option to associate with this synonym</param>
+            <param name="synonym">The new or existing name of a synonym</param>
+            <param name="language">The language of the synonym; defaults to the opco's language</param>
+            <returns>The new or existing synonym</returns>
+            <exception cref="T:Terra.ServerException">The option does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Options.RemoveSynonym(Terra.Option,Terra.Synonym)">
+            <summary>
+            Remove the synonym with from the option.  Note that this doesn't
+            delete the synonym, simply removes its association from this 
+            option.
+            </summary>
+            <param name="option">The option with which to disassociate the synonym</param>
+            <param name="synonym">The synonym for the option</param>
+            <exception cref="T:Terra.ServerException">Either the option or the synonym doesn't exist</exception>
+        </member>
+        <member name="T:Terra.Request">
+            <summary>
+            Wraps the RestSharp.RestRequest functionality in something a little
+            simpler and streamlined for our purposes.  For example, adds the 
+            JSON headers, and the user credentials if present in the client. 
+            <para>
+            Do not instantiate an instance of this class directly; get it from
+            the Terra.Client.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Terra.Request.#ctor(Terra.Client,System.String,RestSharp.Method)">
+            <summary>
+            Used by the Terra.Client to create a new request.
+            </summary>
+            <param name="client">The Client instance with which this request is associated</param>
+            <param name="resource">The path to the Terra server information, e.g. "categories"</param>
+            <param name="method">The HTTP method type of the request; defaults to Method.GET</param>
+        </member>
+        <member name="M:Terra.Request.AddParameter(System.String,System.Object)">
+            <summary>
+            Calls the RestRequest.AddParameter method if a value is submitted.  
+            Otherwise skips it.  
+            </summary>
+            <param name="name">The parameter name to set</param>
+            <param name="value">The value to set it to in the request</param>
+            <returns>This Request object, so you can chain AddParameter calls together</returns>
+        </member>
+        <member name="M:Terra.Request.MakeRequest``1">
+            <summary>
+            Wraps the call to RestClient.Execute, so that we can trap and throw exceptions properly.
+            </summary>
+            <typeparam name="T">The expected return type values, such as Category or List&lt;Option&gt;</typeparam>
+            <returns>The results of the request</returns>
+        </member>
+        <member name="M:Terra.Request.GenericRequest">
+            <summary>
+            Make a Terra API request that may return a mixture of Node types,
+            such as search results.
+            </summary>
+            <returns>A list of varying types of nodes</returns>
+        </member>
+        <member name="M:Terra.Request.StringRequest">
+            <summary>
+            Just return the string content from the HTTP request.
+            </summary>
+            <returns>A string value received from the server</returns>
+        </member>
+        <member name="M:Terra.Request.MakeRequest">
+            <summary>
+            Wraps the call to RestClient.Execute, so that we can trap and 
+            throw exceptions properly. This type of request doesn't expect a 
+            response, just an error if something goes wrong.
+            </summary>
+        </member>
+        <member name="T:Terra.Property">
+            <summary>
+            Relates an option to a category in a meaningful way.  For example, a
+            property might be "Cuisine", and tie "Steak" to a restaurant, while
+            another property "Sells" may associate "Steak" with a butcher.  It
+            is the "verb" in any category-option relation.
+            <para>
+            The Property class itself represents a meme that internally is not
+            really the relation between a category or taxonomy and an option.
+            Instead, it provides a human-friendly form of that relation's verb.
+            The relation itself is isolated from the Property meme deep inside
+            of Terra.  In most instances you can treat the Property as the
+            relation, but know there are also relations between objects in 
+            Terra which are not defined as properties.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Terra.Property.Name">
+            <summary>
+            A human-readable name for the property
+            </summary>
+        </member>
+        <member name="P:Terra.Property.Slug">
+            <summary>
+            The relation type ("verb") used to indicate this property relation
+            between an option and a category or taxonomy
+            </summary>
+        </member>
+        <member name="P:Terra.Property.External">
+            <summary>
+            A third-party external identifier for the property; optional, and
+            rare
+            </summary>
+        </member>
+        <member name="P:Terra.Property.Language">
+            <summary>
+            The language of the property name
+            </summary>
+        </member>
+        <member name="P:Terra.Property.Opco">
+            <summary>
+            The operating company for which this property is associated
+            </summary>
+        </member>
+        <member name="P:Terra.Property.Version">
+            <summary>
+            An internal tracking code used to ensure that updates by the client
+            do not overwrite changes made on the server between the time the
+            client version of this property was retrieved and when it was 
+            written
+            </summary>
+        </member>
+        <member name="P:Terra.Property.Options">
+            <summary>
+            When requesting properties and options for a category, taxonomy, or
+            heading, the options will return associated with each property
+            </summary>
+        </member>
+        <member name="T:Terra.Service.Superheadings">
+            <summary>
+            Superheadings provide for a very limited grouping of headings within
+            Terra, to reduce the amount of information that has to come back when
+            working with headings.  
+            <para>
+            Do not create an instance of this directly.  Instead, call in through 
+            the Terra.Client.Superheadings.
+            </para>
+            </summary>
+            <seealso cref="P:Terra.Client.Superheadings"/>
+        </member>
+        <member name="M:Terra.Service.Superheadings.All(System.String)">
+            <summary>
+            Returns all the superheadings associated with the given opco.
+            </summary>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <returns>A list of Superheadings</returns>
+            <exception cref="T:Terra.ServerException">The operating company does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.Get(System.String,System.String)">
+            <summary>
+            Look up a superheading by its slug.  Useful for checking to see if an
+            superheading exists.
+            </summary>
+            <param name="opco">The three or four letter code for the opco</param>
+            <param name="slug">The superheadings's slug</param>
+            <returns>An Superheading object</returns>
+            <exception cref="T:Terra.ServerException">The operating company or superheading does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.Create(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Create a new superheading.  
+            </summary>
+            <param name="opco">The three or four letter code for the operating company</param>
+            <param name="name">The human-readable name for this superheading</param>
+            <param name="slug">A unique slug for this superheading; superheadingal, will be generated from the name if not provided</param>
+            <param name="external">An third-party external identifier for this superheading (superheadingal)</param>
+            <param name="language">The two-letter ISO language for the superheading's name; defaults to the opco's language</param>
+            <returns>The newly created Superheading</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the slug already exists, returns a status of Conflict.</description>
+            </item>
+            <item>
+            <description>If the operating company, relatedTo, or relatedBy does not exist, returns a status of Not Found.</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.Update(Terra.Superheading)">
+            <summary>
+            Update the name, external identifier, or language for this superheading.  
+            Neither the operating company nor the slug may be modified.
+            </summary>
+            <param name="superheading">An superheading with the updated information</param>
+            <returns>A new Superheading object, with the updates in place</returns>
+            <exception cref="T:Terra.ServerException">
+            <list type="bullet">
+            <item>
+            <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
+            </item>
+            <item>
+            <description>If the existing superheading could not be found on the server, returns a status of Not Found</description>
+            </item>
+            <item>
+            <description>If the local superheading is older than the version on the server, a Precondition Failed status is returned</description>
+            </item>
+            </list>
+            </exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.Delete(Terra.Superheading)">
+            <summary>
+            Completely delete a superheading from Terra.  If you delete a 
+            superheading, the headings will still be available from the
+            operating company itself.
+            </summary>
+            <param name="superheading">The superheading to delete</param>
+            <exception cref="T:Terra.ServerException">The superheading does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.Synonyms(Terra.Superheading)">
+            <summary>
+            Get the list of synonyms associated with this superheading.
+            </summary>
+            <param name="superheading">The superheading</param>
+            <returns>A list of synonyms</returns>
+            <exception cref="T:Terra.ServerException">The superheading does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.CreateSynonym(Terra.Superheading,System.String,System.String,System.String)">
+            <summary>
+            Create a new synonym and associate it with this superheading.
+            <para>
+            Synonyms may also be used as a simple translation tool.  When you
+            create a synonym, by default it is assigned to the same langauge as
+            the operating company.  However, by assigning a different language
+            to the synonym, you now have a translation for the superheading.
+            </para>
+            </summary>
+            <param name="superheading">The superheading to associate with the synonym</param>
+            <param name="name">The human-readable name of the synonym</param>
+            <param name="slug">An SEO-compliant slug for the synonym; generated if not provided</param>
+            <param name="language">The language of the name; defaults to the opco's language</param>
+            <returns>The newly created Synonym</returns>
+            <exception cref="T:Terra.ServerException">The superheading does not exist, or the synonym already exists</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.AddSynonym(Terra.Superheading,Terra.Synonym)">
+            <summary>
+            Associate an existing synonym with a superheading.
+            </summary>
+            <param name="superheading">The superheading with which to associate the synonym</param>
+            <param name="synonym">The synonym for the superheading</param>
+            <exception cref="T:Terra.ServerException">Either the superheading or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.AddSynonym(Terra.Superheading,System.String,System.String)">
+            <summary>
+            This is a convenience method to create or add an existing synonym
+            (or translation) to a superheading.  If the synonym does not already
+            exist, it is created with a default slug (and default language, if
+            not otherwise indicated).  The synonym, existing or new, is
+            associated with the superheading.
+            </summary>
+            <param name="superheading">The superheading to associate with this synonym</param>
+            <param name="synonym">The new or existing name of a synonym</param>
+            <param name="language">The language of the synonym; defaults to the opco's language</param>
+            <returns>The new or existing synonym</returns>
+            <exception cref="T:Terra.ServerException">The superheading does not exist</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.RemoveSynonym(Terra.Superheading,Terra.Synonym)">
+            <summary>
+            Remove the synonym with from the superheading.  Note that this doesn't
+            delete the synonym, simply removes its association from this 
+            superheading.
+            </summary>
+            <param name="superheading">The superheading with which to disassociate the synonym</param>
+            <param name="synonym">The synonym for the superheading</param>
+            <exception cref="T:Terra.ServerException">Either the superheading or the synonym doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.Headings(Terra.Superheading)">
+            <summary>
+            Retrieve the headings associated with this superheading.
+            </summary>
+            <param name="superheading">The superheading parent</param>
+            <returns>A list of headings</returns>
+        </member>
+        <member name="M:Terra.Service.Superheadings.AddHeading(Terra.Superheading,Terra.Heading)">
+            <summary>
+            Add a heading to the given superheading.  You may repeatedly add
+            a heading to a superheading with no ill or adverse effects, and
+            no exceptions will be thrown.  
+            </summary>
+            <param name="superheading">The parent superheading</param>
+            <param name="heading">The child heading</param>
+            <exception cref="T:Terra.ServerException">Either the superheading or the heading doesn't exist</exception>
+        </member>
+        <member name="M:Terra.Service.Superheadings.RemoveHeading(Terra.Superheading,Terra.Heading)">
+            <summary>
+            Remove the heading from the superheading.  Removing a heading from
+            a superheading that doesn't have that heading has no effect and
+            generates no exceptions.
+            </summary>
+            <param name="superheading">The superheading parent</param>
+            <param name="heading">The child heading</param>
+            <exception cref="T:Terra.ServerException">Either the superheading or the heading doesn't exist</exception>
+        </member>
+        <member name="T:Terra.NamespaceDoc">
+            <summary>
+            The Terra 2.0 Client API allows developers to build software applications
+            locally that can interact with the Brilliant Arc Terra Taxonomy 
+            Management Tool on an active and ongoing basis, with the same level of
+            functionality as the Terra Client UI.  This enables local back-office
+            and consumer-driven applications to utilitze the knowledge contained 
+            within Terra as they would any other database, but with the added power
+            of the Terra relations and inheritance technologies.
+            <para>
+            The API is a very lightweight, thin wrapper around the RESTful JSON-based
+            server API.  Most of the business logic, authentication, authorization
+            and other functionality resides on the server.  The client API does 
+            contain a few bits of helper code, but it is not a full-blown object
+            model system.  It is simple, safe, and fast.
+            </para>
+            <para>
+            The Terra 2.0 Client API has been redesigned to conform with C# coding
+            standards.  It is also somewhat functional in nature, due to its 
+            interactions with the server:  no objects are ever directly modified
+            by the API.  For example, updating a category will return a new
+            instance of a Category object; it will not change the category object
+            submitted. 
+            </para>
+            <para>
+            Functions of the API are all handled on the Client services, rather 
+            than the objects themselves.  This keeps the library both simple and
+            thread-safe.  For example, when mapping a heading to a category, you
+            call a function on Terra.Client.Headings, not on the Terra.Heading
+            object.  This reinforces the functional nature of the API.
+            </para>
+            <para>
+            To make a request of the server, first authenticate a user against an
+            instance of the Terra.Client, then submit requests across that client's
+            services.  
+            </para>
+            <code>
+                var client = new Terra.Client("http://tax.eurodir.eu/api");
+                client.authenticate("someuser", "somepassword");
+                List&lt;Taxonomy&gt; taxonomies = client.Taxonomies.All("PKT");
+            </code>
+            </summary>
+        </member>
+    </members>
+</doc>
