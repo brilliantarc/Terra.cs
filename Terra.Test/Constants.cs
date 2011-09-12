@@ -7,8 +7,8 @@ namespace Terra.Test
 {
     public class Constants
     {
-        public const string TestServer = "http://10.0.0.5:4000";
-        public const string TestUser = "admin";
-        public const string TestPassword = "admin!";
+        public const string TestServer = "http://localhost:4000";
+        public const string TestUser = "sampleuser";
+        public const string TestPassword = "samplepassword";
     }
 }
