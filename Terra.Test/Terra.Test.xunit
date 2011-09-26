@@ -2,5 +2,6 @@
 <xunit>
   <assemblies>
     <assembly filename="bin\Release\Terra.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Release\Terra.Test.dll" shadow-copy="true" />
   </assemblies>
 </xunit>

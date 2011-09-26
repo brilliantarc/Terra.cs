@@ -123,6 +123,7 @@ namespace Terra.Service
             _client.Request("superheading", Method.DELETE).
                 AddParameter("opco", superheading.Opco).
                 AddParameter("slug", superheading.Slug).
+                AddParameter("v", superheading.Version).
                 MakeRequest();
         }
 

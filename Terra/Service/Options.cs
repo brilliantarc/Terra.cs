@@ -26,6 +26,21 @@ namespace Terra.Service
             _client = client;
         }
 
+
+        /// <summary>
+        /// Get all the options defined for the operating company.  This may return
+        /// options that are not in use, i.e. not associated with any taxonomies or
+        /// categories, but are still defined in the system.
+        /// </summary>
+        /// <param name="opco">The three or four letter code for the operating company</param>
+        /// <returns>A list of all Option objects associate with the operating company</returns>
+        public List<Option> All(String opco)
+        {
+            return _client.Request("options").
+                AddParameter("opco", opco).
+                MakeRequest<List<Option>>();
+        }
+
         /// <summary>
         /// Look up an option by its slug.  Useful for checking to see if an
         /// option exists.
@@ -132,6 +147,7 @@ namespace Terra.Service
             _client.Request("option", Method.DELETE).
                 AddParameter("opco", option.Opco).
                 AddParameter("slug", option.Slug).
+                AddParameter("v", option.Version).
                 MakeRequest();
         }
 

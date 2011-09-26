@@ -22,6 +22,21 @@ namespace Terra.Service
         }
 
         /// <summary>
+        /// Get all the categories defined for the operating company.  This may return
+        /// categories that are not in use, i.e. not in any taxonomies, but are still
+        /// defined in the system.
+        /// </summary>
+        /// <param name="opco">The three or four letter code for the operating company</param>
+        /// <returns>A list of Category objects</returns>
+        /// <exception cref="Terra.ServerException">The given taxonomy does not exist</exception>
+        public List<Category> All(String opco)
+        {
+            return _client.Request("categories").
+                AddParameter("opco", opco).
+                MakeRequest<List<Category>>();
+        }
+
+        /// <summary>
         /// Get the top-level categories for the given taxonomy.  Note that this
         /// does not return all the categories for a taxonomy.
         /// </summary>

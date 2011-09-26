@@ -92,6 +92,7 @@ namespace Terra.Service
             _client.Request("synonym", Method.DELETE).
                 AddParameter("opco", synonym.Opco).
                 AddParameter("slug", synonym.Slug).
+                AddParameter("v", synonym.Version).
                 MakeRequest();
         }
     }
