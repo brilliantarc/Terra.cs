@@ -63,7 +63,7 @@ namespace Terra.Service
         /// </item>
         /// </list>
         /// </exception>
-        public Option Create(string opco, string name, string slug = null, string external = null, string language = null, 
+        public Option Create(string opco, string name, string slug = null, string external = null, string language = null,
             Node relatedTo = null, Property relatedBy = null)
         {
             var request = _client.Request("option", Method.POST).
@@ -117,6 +117,7 @@ namespace Terra.Service
                 AddParameter("slug", option.Slug).
                 AddParameter("external", option.External).
                 AddParameter("lang", option.Language).
+                AddParameter("v", option.Version).
                 MakeRequest<Option>();
         }
 
@@ -241,6 +242,57 @@ namespace Terra.Service
                 AddParameter("opco", option.Opco).
                 AddParameter("option", option.Slug).
                 AddParameter("slug", synonym.Slug).
+                MakeRequest();
+        }
+
+        /// <summary>
+        /// Get the "sub" options for this option.  Options can be related to other
+        /// options, as sort of "child" options.  This functionality isn't widely
+        /// used, and if you're considering using suboptions, you should first
+        /// consider using synonyms instead.
+        /// </summary>
+        /// <param name="option">The parent option</param>
+        /// <returns>The options related to the given parent option</returns>
+        /// <exception cref="Terra.ServerException">The option doesn't exist</exception>
+        public List<Option> Suboptions(Option option)
+        {
+            return _client.Request("option/sub").
+                AddParameter("opco", option.Opco).
+                AddParameter("slug", option.Slug).
+                MakeRequest<List<Option>>();
+        }
+
+        /// <summary>
+        /// Associate an option as a "suboption" of a parent option.  This
+        /// functionality isn't widely used, and if you're considering using
+        /// suboptions, you should first consider using synonyms instead.
+        /// </summary>
+        /// <param name="option">The parent option</param>
+        /// <param name="suboption">The option to relate to the parent</param>
+        /// <exception cref="Terra.ServerException">Either the option or the suboption doesn't exist</exception>
+        public void AddSuboption(Option option, Option suboption)
+        {
+            _client.Request("option/sub", Method.PUT).
+                AddParameter("opco", option.Opco).
+                AddParameter("option", option.Slug).
+                AddParameter("suboption", suboption.Slug).
+                MakeRequest();
+        }
+
+        /// <summary>
+        /// Remove the association between an option and its "suboption".  This
+        /// functionality isn't widely used, and if you're considering using
+        /// suboptions, you should first consider using synonyms instead.
+        /// </summary>
+        /// <param name="option">The parent option</param>
+        /// <param name="suboption">The option to remove (does not delete the suboption)</param>
+        /// <exception cref="Terra.ServerException">Either the option or the suboption doesn't exist</exception>
+        public void RemoveSuboption(Option option, Option suboption)
+        {
+            _client.Request("option/sub", Method.DELETE).
+                AddParameter("opco", option.Opco).
+                AddParameter("option", option.Slug).
+                AddParameter("suboption", suboption.Slug).
                 MakeRequest();
         }
     }

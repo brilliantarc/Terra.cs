@@ -43,9 +43,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CategoriesTest.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="OperatingCompaniesTest.cs" />
+    <Compile Include="OptionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SearchTest.cs" />
     <Compile Include="TaxonomiesTest.cs" />
   </ItemGroup>
   <ItemGroup>

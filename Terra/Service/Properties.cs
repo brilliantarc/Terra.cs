@@ -153,6 +153,7 @@ namespace Terra.Service
                 AddParameter("slug", property.Slug).
                 AddParameter("external", property.External).
                 AddParameter("lang", property.Language).
+                AddParameter("v", property.Version).
                 MakeRequest<Property>();
         }
 

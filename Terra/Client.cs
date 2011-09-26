@@ -227,5 +227,17 @@ namespace Terra
         {
             return Request("uuid").StringRequest();
         }
+
+        /// <summary>
+        /// Used in testing the API, when you call this you'll clear all the
+        /// categories, properties, options, taxonomies, headings, superheadings,
+        /// and synonyms out of the TEST portfolio.  This is not useful in a 
+        /// production setting, and will return an error message if the test
+        /// portfolio has not been created and initialized.
+        /// </summary>
+        public void ResetTestPortfolio()
+        {
+            Request("test/reset").StringRequest();
+        }
     }
 }

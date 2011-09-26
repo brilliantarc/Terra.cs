@@ -107,6 +107,7 @@ namespace Terra.Service
                 AddParameter("slug", superheading.Slug).
                 AddParameter("external", superheading.External).
                 AddParameter("lang", superheading.Language).
+                AddParameter("v", superheading.Version).
                 MakeRequest<Superheading>();
         }
 
@@ -242,7 +243,10 @@ namespace Terra.Service
         /// <returns>A list of headings</returns>
         public List<Heading> Headings(Superheading superheading)
         {
-            return null;
+            return _client.Request("superheading/headings").
+                AddParameter("opco", superheading.Opco).
+                AddParameter("slug", superheading.Slug).
+                MakeRequest<List<Heading>>();
         }
 
         /// <summary>
@@ -255,7 +259,11 @@ namespace Terra.Service
         /// <exception cref="Terra.ServerException">Either the superheading or the heading doesn't exist</exception>
         public void AddHeading(Superheading superheading, Heading heading)
         {
-
+            _client.Request("superheading/heading", Method.PUT).
+                AddParameter("opco", superheading.Opco).
+                AddParameter("superheading", superheading.Slug).
+                AddParameter("heading", heading.Pid).
+                MakeRequest();
         }
 
         /// <summary>
@@ -268,6 +276,11 @@ namespace Terra.Service
         /// <exception cref="Terra.ServerException">Either the superheading or the heading doesn't exist</exception>
         public void RemoveHeading(Superheading superheading, Heading heading)
         {
+            _client.Request("superheading/heading", Method.DELETE).
+                AddParameter("opco", superheading.Opco).
+                AddParameter("superheading", superheading.Slug).
+                AddParameter("heading", heading.Pid).
+                MakeRequest();
         }
     }
 }

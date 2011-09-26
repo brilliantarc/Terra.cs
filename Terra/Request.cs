@@ -119,6 +119,7 @@ namespace Terra
                 IList<IDictionary<string, Object>> json = JsonConvert.DeserializeObject<IList<IDictionary<string, Object>>>(result.Content);
                 foreach (var node in json)
                 {
+                    Console.WriteLine("Examining node " + node["name"] + ", " + node["definition"]);
                     try
                     {
                         switch (node["definition"] as String)
@@ -149,7 +150,9 @@ namespace Terra
                                 break;
                         }
                     }
-                    catch (KeyNotFoundException) { }
+                    catch (KeyNotFoundException e) {
+                        Console.WriteLine(e);
+                    }
                 }
             }
             else

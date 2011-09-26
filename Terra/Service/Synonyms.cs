@@ -10,6 +10,11 @@ namespace Terra.Service
     /// the other services, such as Terra.Service.Categories.  This service
     /// is primarily for updating and mass-deleting synonyms.
     /// <para>
+    /// Synonyms must be created and associated with a meme, like a category or
+    /// an option.  There is no Create method in this service class; look to
+    /// the individual meme services, such as Categories.CreateSynonym, instead.
+    /// </para>
+    /// <para>
     /// Do not create an instance of this directly.  Instead, call in through 
     /// the Terra.Client.Synonyms.
     /// </para>
@@ -35,49 +40,6 @@ namespace Terra.Service
         public Synonym Get(string opco, string slug)
         {
             return _client.Request("synonym").AddParameter("opco", opco).AddParameter("slug", slug).MakeRequest<Synonym>();
-        }
-
-        /// <summary>
-        /// Create a new synonym.  
-        /// <para>
-        /// This will create a "free" synonym in the operating company's 
-        /// portfolio; the majority of the time this is not what you want.
-        /// Instead, see the individual category, taxonomy, etc. services for
-        /// methods to create synonyms and attach them to another meme in the
-        /// same call.
-        /// </para>
-        /// </summary>
-        /// <seealso cref="Terra.Service.Categories.CreateSynonym"/>
-        /// <seealso cref="Terra.Service.Taxonomies.CreateSynonym"/>
-        /// <seealso cref="Terra.Service.Properties.CreateSynonym"/>
-        /// <seealso cref="Terra.Service.Options.CreateSynonym"/>
-        /// <seealso cref="Terra.Service.Headings.CreateSynonym"/>
-        /// <seealso cref="Terra.Service.Superheadings.CreateSynonym"/>
-        /// <param name="opco">The three or four letter code for the operating company</param>
-        /// <param name="name">The human-readable name for this synonym</param>
-        /// <param name="slug">A unique slug for this synonym; synonymal, will be generated from the name if not provided</param>
-        /// <param name="external">An third-party external identifier for this synonym (synonymal)</param>
-        /// <param name="language">The two-letter ISO language for the synonym's name; defaults to the opco's language</param>
-        /// <returns>The newly created Synonym</returns>
-        /// <exception cref="Terra.ServerException">
-        /// <list type="bullet">
-        /// <item>
-        /// <description>If any of the parameters submitted are invalid, returns a status of Not Acceptable.</description>
-        /// </item>
-        /// <item>
-        /// <description>If the slug already exists, returns a status of Conflict.</description>
-        /// </item>
-        /// </list>
-        /// </exception>
-        public Synonym Create(string opco, string name, string slug = null, string external = null, string language = null)
-        {
-            return _client.Request("synonym", Method.POST).
-                AddParameter("opco", opco).
-                AddParameter("name", name).
-                AddParameter("slug", slug).
-                AddParameter("external", external).
-                AddParameter("lang", language).
-                MakeRequest<Synonym>();
         }
 
         /// <summary>
@@ -107,6 +69,7 @@ namespace Terra.Service
                 AddParameter("slug", synonym.Slug).
                 AddParameter("external", synonym.External).
                 AddParameter("lang", synonym.Language).
+                AddParameter("v", synonym.Version).
                 MakeRequest<Synonym>();
         }
 

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Terra
 {
@@ -22,6 +24,7 @@ namespace Terra
     /// </summary>
     public class Property : Node
     {
+
         /// <summary>
         /// A human-readable name for the property
         /// </summary>
@@ -61,6 +64,7 @@ namespace Terra
         /// When requesting properties and options for a category, taxonomy, or
         /// heading, the options will return associated with each property
         /// </summary>
+        [JsonConverter(typeof(List<Option>))]
         public List<Option> Options { get; set; }
 
         public override bool Equals(object obj)
@@ -86,11 +90,7 @@ namespace Terra
 
             if (dictionary.ContainsKey("options"))
             {
-                property.Options = new List<Option>();
-                foreach (var option in (IList<IDictionary<string, Object>>)dictionary["options"])
-                {
-                    property.Options.Add(Option.FromDictionary(option));
-                }
+                // TODO!
             }
 
             return property;

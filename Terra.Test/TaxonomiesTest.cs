@@ -18,18 +18,20 @@ namespace Terra.Test
         [Fact]
         public void CrudTaxonomies()
         {
+            client.ResetTestPortfolio();
+
             // Create a taxonomy
             Assert.DoesNotThrow(
                 delegate
                 {
-                    client.Taxonomies.Create("PKT", "The CRUD Test Taxonomy", "crud-test", "en");
+                    client.Taxonomies.Create(Constants.TestPortfolio, "The CRUD Test Taxonomy", "crud-test", "en");
                 });
-            Assert.NotEmpty(client.Taxonomies.All("PKT"));
+            Assert.NotEmpty(client.Taxonomies.All(Constants.TestPortfolio));
 
             // Get the taxonomy
-            var taxonomy = client.Taxonomies.Get("PKT", "crud-test");
+            var taxonomy = client.Taxonomies.Get(Constants.TestPortfolio, "crud-test");
             Assert.NotNull(taxonomy);
-            Assert.Contains<Terra.Taxonomy>(taxonomy, client.Taxonomies.All("PKT"));
+            Assert.Contains<Terra.Taxonomy>(taxonomy, client.Taxonomies.All(Constants.TestPortfolio));
 
             // Update the taxonomy
             taxonomy.Name = "The Adjusted CRUD Test Taxonomy";
@@ -42,11 +44,11 @@ namespace Terra.Test
 
             // Delete the taxonomy
             client.Taxonomies.Delete(updated);
-            Assert.DoesNotContain<Terra.Taxonomy>(updated, client.Taxonomies.All("PKT"));
+            Assert.DoesNotContain<Terra.Taxonomy>(updated, client.Taxonomies.All(Constants.TestPortfolio));
             Assert.Throws<Terra.ServerException>(
                 delegate
                 {
-                    client.Taxonomies.Get("PKT", "crud-test");
+                    client.Taxonomies.Get(Constants.TestPortfolio, "crud-test");
                 });
         }
     }

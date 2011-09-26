@@ -73,6 +73,7 @@ namespace Terra.Service
         /// <param name="opco">The three or four letter code for the operating company</param>
         /// <param name="name">The name of the category</param>
         /// <param name="slug">A unique identifier for the category, or null to have one generated</param>
+        /// <param name="external">A third-party identifier for a category; should probably be unique, but not required</param>
         /// <param name="language">The language of the category, or null to use the opco's language</param>
         /// <param name="parent">May be either a category or a taxonomy; if a taxonomy, becomes a top-level category in that taxonomy</param>
         /// <returns>The newly created Category object</returns>
@@ -89,12 +90,13 @@ namespace Terra.Service
         /// </item>
         /// </list>
         /// </exception>
-        public Category Create(string opco, string name, string slug = null, string language = null, Node parent = null)
+        public Category Create(string opco, string name, string slug = null, string external = null, string language = null, Node parent = null)
         {
             var request = _client.Request("category", Method.POST).
                 AddParameter("opco", opco).
                 AddParameter("name", name).
                 AddParameter("slug", slug).
+                AddParameter("external", external).
                 AddParameter("lang", language);
 
             if (parent is Taxonomy)
@@ -410,7 +412,7 @@ namespace Terra.Service
         }
 
         /// <summary>
-        /// Find all the options associated with this category.  
+        /// Find all the options directly associated with this category.  
         /// <para>
         /// This operation can be a bit slow, as the system has to filter and 
         /// collate options and properties.  It is typically faster to request
@@ -428,6 +430,23 @@ namespace Terra.Service
                 AddParameter("slug", category.Slug).
                 MakeRequest<List<Property>>();
         }
+
+        /// <summary>
+        /// Find all the options directly associated with this category by the 
+        /// given property.  
+        /// </summary>
+        /// <param name="category">The category of options to retrieve</param>
+        /// <param name="property">The property to limit the options by</param>
+        /// <returns>A list of Option objects associate with the category by the property</returns>
+        public List<Option> Options(Category category, Property property)
+        {
+            return _client.Request("category/options").
+                AddParameter("opco", category.Opco).
+                AddParameter("slug", category.Slug).
+                AddParameter("property", property.Slug).
+                MakeRequest<List<Option>>();
+        }
+
 
         /// <summary>
         /// Add an option to a category.  The category, option, and property
@@ -478,7 +497,7 @@ namespace Terra.Service
             return _client.Request("category/mappings").
                 AddParameter("opco", category.Opco).
                 AddParameter("slug", category.Slug).
-                AddParameter("dir", "to").
+                AddParameter("dir", "from").
                 MakeRequest<List<Category>>();
         }
 
@@ -495,7 +514,7 @@ namespace Terra.Service
             return _client.Request("category/mappings").
                 AddParameter("opco", category.Opco).
                 AddParameter("slug", category.Slug).
-                AddParameter("dir", "from").
+                AddParameter("dir", "to").
                 MakeRequest<List<Category>>();
         }
 

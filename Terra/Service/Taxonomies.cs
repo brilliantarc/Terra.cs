@@ -327,7 +327,7 @@ namespace Terra.Service
         }
 
         /// <summary>
-        /// Find all the options associated with this taxonomy.  
+        /// Find all the options directly associated with this taxonomy.  
         /// 
         /// This operation can be a bit slow, as the system has to filter and 
         /// collate options and properties.  It is typically faster to request
@@ -343,7 +343,23 @@ namespace Terra.Service
             return _client.Request("taxonomy/options").
                 AddParameter("opco", taxonomy.Opco).
                 AddParameter("slug", taxonomy.Slug).
-                MakeRequest<List<Property>>();
+                GenericRequest().ConvertAll<Property>(node => (Property) node);;
+        }
+
+        /// <summary>
+        /// Find all the options directly associated with this category by the 
+        /// given property.  
+        /// </summary>
+        /// <param name="taxonomy">The taxonomy of options to retrieve</param>
+        /// <param name="property">The property to limit the options by</param>
+        /// <returns>A list of the Options associated with the taxonomy via the property</returns>
+        public List<Option> Options(Taxonomy taxonomy, Property property)
+        {
+            return _client.Request("taxonomy/options").
+                AddParameter("opco", taxonomy.Opco).
+                AddParameter("slug", taxonomy.Slug).
+                AddParameter("property", property.Slug).
+                MakeRequest<List<Option>>();
         }
 
         /// <summary>
