@@ -18,7 +18,7 @@ namespace Terra
     /// slug "bicycle-helmet" and the other has the slug "motorcycle-helmet".
     /// </para>
     /// </summary>
-    public class Option : Node
+    public class Option : Meme
     {
         /// <summary>
         /// A name for this option; need not be unique
@@ -54,6 +54,16 @@ namespace Terra
         /// written
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Returns "Option" for the definition of the option meme.  This is
+        /// used internally; you should not need to refer to it in your client 
+        /// code.
+        /// </summary>
+        public string Definition
+        {
+            get { return "Option"; }
+        }
 
         public override bool Equals(object obj)
         {

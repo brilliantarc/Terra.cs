@@ -11,7 +11,7 @@ namespace Terra
     /// in order to make them easier to work with, like headings grouped
     /// together in rough verticals.
     /// </summary>
-    public class Superheading : Node
+    public class Superheading : Meme
     {
         /// <summary>
         /// The name of the superheading
@@ -45,6 +45,16 @@ namespace Terra
         /// written
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Returns "Superheading" for the definition of the superheading meme.  
+        /// This is used internally; you should not need to refer to it in your 
+        /// client code.
+        /// </summary>
+        public string Definition
+        {
+            get { return "Superheading"; }
+        }
 
         public override int GetHashCode()
         {

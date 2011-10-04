@@ -22,7 +22,7 @@ namespace Terra
     /// Terra which are not defined as properties.
     /// </para>
     /// </summary>
-    public class Property : Node
+    public class Property : Meme
     {
 
         /// <summary>
@@ -59,6 +59,16 @@ namespace Terra
         /// written
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Returns "Property" for the definition of the property meme.  This is
+        /// used internally; you should not need to refer to it in your client 
+        /// code.
+        /// </summary>
+        public string Definition
+        {
+            get { return "Property"; }
+        }
 
         /// <summary>
         /// When requesting properties and options for a category, taxonomy, or

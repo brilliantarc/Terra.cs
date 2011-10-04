@@ -43,6 +43,20 @@ namespace Terra.Service
         }
 
         /// <summary>
+        /// Get a list of synonyms for the given meme.
+        /// </summary>
+        /// <param name="meme">The meme for which to look for attached synonyms</param>
+        /// <returns>A list of the Synonyms</returns>
+        public List<Synonym> For(Meme meme)
+        {
+            return _client.Request("synonyms").
+                AddParameter("opco", meme.Opco).
+                AddParameter("definition", meme.Definition).
+                AddParameter("slug", meme.Slug).
+                MakeRequest<List<Synonym>>();
+        }
+
+        /// <summary>
         /// Update the name, external identifier, or language for this synonym.  
         /// Neither the operating company nor the slug may be modified.
         /// </summary>

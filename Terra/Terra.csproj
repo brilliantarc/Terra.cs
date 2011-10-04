@@ -51,6 +51,7 @@
     <Compile Include="Category.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Heading.cs" />
+    <Compile Include="Meme.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="OperatingCompany.cs" />
     <Compile Include="Option.cs" />

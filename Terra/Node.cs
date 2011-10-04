@@ -8,7 +8,7 @@ namespace Terra
     /// <summary>
     /// The base class of all Terra models, such as Category, Taxonomy, etc.
     /// </summary>
-    public abstract class Node
+    public interface Node
     {
     }
 }

@@ -17,7 +17,7 @@ namespace Terra
     /// may suffice.
     /// </para>
     /// </summary>
-    public class Synonym : Node
+    public class Synonym : Meme
     {
         /// <summary>
         /// The name of this synonym
@@ -51,6 +51,16 @@ namespace Terra
         /// written
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Returns "Synonym" for the definition of the synonym meme.  This is
+        /// used internally; you should not need to refer to it in your client 
+        /// code.
+        /// </summary>
+        public string Definition
+        {
+            get { return "Synonym"; }
+        }
 
         public override int GetHashCode()
         {

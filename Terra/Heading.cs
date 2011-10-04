@@ -12,7 +12,7 @@ namespace Terra
     /// be broad strokes, sales or market driven, whereas categories follow a
     /// stricter physical, ontological definition of information.
     /// </summary>
-    public class Heading : Node
+    public class Heading : Meme
     {
         /// <summary>
         /// The localized name of the heading
@@ -48,6 +48,26 @@ namespace Terra
         /// written
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Returns "Heading" for the definition of the heading meme.  This is
+        /// used internally; you should not need to refer to it in your client 
+        /// code.
+        /// </summary>
+        public string Definition
+        {
+            get { return "Heading"; }
+        }
+
+        /// <summary>
+        /// Returns the PID of the heading.  Used by the Meme interface to 
+        /// generalize some server requests.  In your client code, you should
+        /// try to refer to the heading's Pid, instead of its Slug.
+        /// </summary>
+        public string Slug
+        {
+            get { return Pid; }
+        }
 
         public override int GetHashCode()
         {

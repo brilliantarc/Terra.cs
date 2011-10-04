@@ -13,7 +13,7 @@ namespace Terra
     /// properties and options, as well as the properties and options of the
     /// category's parents.
     /// </summary>
-    public class Category : Node
+    public class Category : Meme
     {
         /// <summary>
         /// The name of the category; need not be unique
@@ -53,6 +53,15 @@ namespace Terra
         /// written
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Returns "Category", which is how Terra defines a category.  Used 
+        /// internally; you should not need to refer to this in your client
+        /// code.
+        /// </summary>
+        public string Definition {
+            get { return "Category"; }
+        }
 
         public override int GetHashCode()
         {

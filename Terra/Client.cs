@@ -208,6 +208,61 @@ namespace Terra
         }
 
         /// <summary>
+        /// Run a traversal function on the Terra server.  
+        /// <para>
+        /// Traversal functions travel the graph assembling information based on 
+        /// server-defined functions.  They are highly efficient and fast, much
+        /// faster than trying to crawl the graph remotely, via the API.  If there
+        /// is a case where you need information quickly, consult Brilliant Arc
+        /// about creating a traversal function on the server.
+        /// </para>
+        /// </summary>
+        /// <typeparam name="T">The results expected</typeparam>
+        /// <param name="name">The name of the traversal function, typically something like edsa::taxonomy</param>
+        /// <param name="start">The starting meme (category, heading, option, etc.); this may be optional, based on the traversal function</param>
+        /// <returns>The results indicated by the generic</returns>
+        public T Traverse<T>(String name, Meme start = null) where T : new()
+        {
+            var request = Request("function").AddParameter("name", name);
+            if (start != null)
+            {
+                request.
+                    AddParameter("opco", start.Opco).
+                    AddParameter("definition", start.Definition).
+                    AddParameter("slug", start.Slug);
+            }
+
+            return request.MakeRequest<T>();
+        }
+
+        /// <summary>
+        /// Run a traversal function on the Terra server.
+        /// <para>
+        /// Traversal functions travel the graph assembling information based on 
+        /// server-defined functions.  They are highly efficient and fast, much
+        /// faster than trying to crawl the graph remotely, via the API.  If there
+        /// is a case where you need information quickly, consult Brilliant Arc
+        /// about creating a traversal function on the server.
+        /// </para>
+        /// </summary>
+        /// <param name="name">The name of the traversal function, typically something like edsa::taxonomy</param>
+        /// <param name="start">The starting meme (category, heading, option, etc.); this may be optional, based on the traversal function</param>
+        /// <returns>The results of the function as a string; typically the results are in JSON format, but they could be XML based on the function</returns>
+        public string Traverse(String name, Meme start = null)
+        {
+            var request = Request("function").AddParameter("name", name);
+            if (start != null)
+            {
+                request.
+                    AddParameter("opco", start.Opco).
+                    AddParameter("definition", start.Definition).
+                    AddParameter("slug", start.Slug);
+            }
+
+            return request.StringRequest();
+        }
+
+        /// <summary>
         /// Use the Terra server to generate an SEO-compliant slug based on the
         /// given string value.  
         /// </summary>

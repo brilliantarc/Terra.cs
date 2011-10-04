@@ -12,7 +12,7 @@ namespace Terra
     /// options associated with a taxonomy will be inherited by all of the
     /// categories in the taxonomy.
     /// </summary>
-    public class Taxonomy : Node
+    public class Taxonomy : Meme
     {
         /// <summary>
         /// The name of the taxonomy
@@ -43,6 +43,16 @@ namespace Terra
         /// is modified, an exception will be thrown.
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Returns "Taxonomy" for the definition of the taxonomy meme.  This is
+        /// used internally; you should not need to refer to it in your client 
+        /// code.
+        /// </summary>
+        public string Definition
+        {
+            get { return "Taxonomy"; }
+        }
 
         public override int GetHashCode()
         {
